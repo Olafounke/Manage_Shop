@@ -33,6 +33,6 @@ app.use((req, res, next) => {
 });
 
 //Création des différentes middleware de base
-app.use("/", userRoutes);
+app.use("/api", userRoutes);
 
 module.exports = app;
