@@ -51,13 +51,12 @@ exports.login = (req, res) => {
               .json({ message: "Paire login/mot de passe incorrecte" });
           }
 
-          // const result = mineToken("0000", hash).then((result) => {
-          //   console.log("Nonce:", result.nonce, "Hash:", result.hash);
-          // });
-
-          //Renvoi du response avec le token
-          res.status(200).json({
-            token: "test",
+          const result = mineToken("0000").then((result) => {
+            console.log("Nonce:", result.nonce, "Hash:", result.hash);
+            //Renvoi du response avec le token
+            res.status(200).json({
+              token: result.hash,
+            });
           });
         })
         .catch((error) => res.status(500).json({ error }));
