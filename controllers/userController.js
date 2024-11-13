@@ -2,54 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const dotenv = require("dotenv").config().parsed;
-
-async function mineToken(prefix, hash) {
-  let nonce = 0;
-  console.log("hash :", hash);
-
-  // Boucle qui permet de definir le nonce et le nouveau hash
-  while (!hash.startsWith(prefix)) {
-    const data = `${hash}.${nonce}`;
-    hash = crypto.createHash("sha256").update(data).digest("hex");
-    nonce++;
-  }
-  return { nonce, hash };
-}
-
-function generateDeviceFingerprint(req) {
-  const userAgent = req.headers["user-agent"] || " ";
-  const ip = req.ip || " ";
-  const timezone = req.headers["timezone"] || " ";
-  const fingerprintData = `${userAgent}-${ip}-${timezone}`;
-  return crypto.createHash("sha256").update(fingerprintData).digest("hex");
-}
-
-function createToken(userId, secret, req) {
-  // Défini le payload avec userId et l'expiration dans 24 heures
-  const payload = {
-    userId: userId,
-    role: "user",
-    issuedAt: Date.now(),
-    scope: ["read", "write"],
-    issuer: "authServer",
-    deviceFingerprint: generateDeviceFingerprint(req),
-    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-  };
-  console.log(payload);
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-    "base64"
-  );
-
-  // Génére la signature avec HMAC-SHA256
-  const signature = crypto
-    .createHmac("sha256", secret)
-    .update(encodedPayload)
-    .digest("base64");
-  const encodedSignature = Buffer.from(signature).toString("base64");
-
-  // Assemble le token complet
-  return `${encodedPayload}.${encodedSignature}`;
-}
+const { createToken, mineToken } = require("../middelware/token");
 
 exports.createUser = (req, res) => {
   bcrypt
