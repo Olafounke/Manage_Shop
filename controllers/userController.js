@@ -45,21 +45,10 @@ exports.login = (req, res) => {
             user._id.toString(),
             dotenv.SECRET_KEY,
             req
-          );
-
-          // Minage du token
-          const result = mineToken("000", token).then((result) => {
-            console.log("Nonce:", result.nonce, "Hash:", result.hash);
-            // Hashage du token miner
-            const finalToken = crypto
-              .createHmac("sha256", dotenv.SECRET_KEY)
-              .update(result.hash)
-              .digest("base64");
-            console.log(finalToken);
-
+          ).then((token) => {
             //Renvoi du response avec le token
             res.status(200).json({
-              token: finalToken,
+              token: token,
             });
           });
         })
