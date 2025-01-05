@@ -10,7 +10,7 @@ const app = express();
 //Connexion à la BDD MongoDB avec Mongoose
 mongoose
   .connect(
-    `mongodb+srv://${dotenv.MONGOOSE_USER}:${dotenv.MONGOOSE_PASS}@cluster0.chajq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+    `mongodb+srv://${dotenv.MONGOOSE_USER}:${dotenv.MONGOOSE_PASS}@cluster0.b4iwf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
