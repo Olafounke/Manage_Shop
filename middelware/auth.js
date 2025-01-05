@@ -9,8 +9,6 @@ module.exports = (req, res, next) => {
 
     // Verification du token
     const payload = verifyToken(token, dotenv.SECRET_KEY);
-    console.log("auth :", payload);
-
     if (payload === null) {
       console.log("token expiré ou token invalide");
       return res.status(403).json({ message: "Token invalide" });
