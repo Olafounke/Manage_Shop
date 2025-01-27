@@ -2,7 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const dotenv = require("dotenv").config().parsed;
-const { createToken, mineToken } = require("../middelware/token");
+const { createToken } = require("../middelware/token");
 
 exports.createUser = (req, res) => {
   bcrypt
