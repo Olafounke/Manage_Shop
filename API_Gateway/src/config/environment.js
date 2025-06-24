@@ -28,4 +28,8 @@ module.exports = {
   PROOF_OF_WORK_DIFFICULTY: safeParseInt(process.env.PROOF_OF_WORK_DIFFICULTY, 3),
 
   CORS_ORIGIN: process.env.CORS_ORIGIN,
+
+  PRODUCT_SERVICE_URL: process.env.PRODUCT_SERVICE_URL,
+  CART_SERVICE_URL: process.env.CART_SERVICE_URL,
+  ORDER_SERVICE_URL: process.env.ORDER_SERVICE_URL,
 };

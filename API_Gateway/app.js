@@ -4,7 +4,9 @@ const cors = require("cors");
 const { PORT, DB_URI, CORS_ORIGIN } = require("./src/config/environment");
 
 const authRoutes = require("./src/auth/routes/authRoutes");
-// const productRoutes = require("./src/api/routes/productRoutes");
+const productRoutes = require("./src/api/routes/productRoutes");
+const cartRoutes = require("./src/api/routes/cartRoutes");
+const orderRoutes = require("./src/api/routes/orderRoutes");
 
 const app = express();
 
@@ -23,7 +25,9 @@ mongoose
   .catch((err) => console.error("Erreur de connexion à MongoDB:", err));
 
 app.use("/api/auth", authRoutes);
-//app.use("/api/products", productRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/carts", cartRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
