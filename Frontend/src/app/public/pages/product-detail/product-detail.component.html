@@ -1,0 +1,129 @@
+<div class="product-detail-container">
+  <!-- Bouton retour -->
+  <div class="back-button">
+    <button (click)="goBack()" class="back-btn" type="button">
+      ← Retour aux produits
+    </button>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement du produit...</p>
+  </div>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error && !loading" class="error-state">
+    <h2>Erreur</h2>
+    <p>{{ error }}</p>
+    <button (click)="goBack()" class="retry-btn">Retour à l'accueil</button>
+  </div>
+
+  <!-- Détails du produit -->
+  <div *ngIf="product && !loading" class="product-detail">
+    <div class="container">
+      <div class="product-layout">
+        <!-- Galerie d'images -->
+        <div class="product-gallery">
+          <div class="main-image">
+            <img [src]="getSelectedImage()" [alt]="product.name" />
+          </div>
+
+          <!-- Miniatures -->
+          <div
+            *ngIf="product.images && product.images.length > 1"
+            class="image-thumbnails"
+          >
+            <div
+              *ngFor="let image of product.images; let i = index"
+              class="thumbnail"
+              [class.active]="i === selectedImageIndex"
+              (click)="selectImage(i)"
+            >
+              <img [src]="image" [alt]="product.name + ' - Image ' + (i + 1)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations du produit -->
+        <div class="product-info">
+          <div class="product-header">
+            <h1 class="product-name">{{ product.name }}</h1>
+
+            <div
+              class="product-categories"
+              *ngIf="product.categories && product.categories.length > 0"
+            >
+              <span
+                *ngFor="let category of product.categories"
+                class="category-tag"
+              >
+                {{ category }}
+              </span>
+            </div>
+          </div>
+
+          <div class="product-price">
+            <span class="price">{{ formatPrice(product.price) }}</span>
+          </div>
+
+          <div class="product-description" *ngIf="product.description">
+            <h3>Description</h3>
+            <p>{{ product.description }}</p>
+          </div>
+
+          <!-- Sélecteur de quantité -->
+          <div class="quantity-selector">
+            <h3>Quantité</h3>
+            <div class="quantity-controls">
+              <button
+                (click)="decreaseQuantity()"
+                class="quantity-btn"
+                [disabled]="quantity <= 1"
+                type="button"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                [value]="quantity"
+                (change)="onQuantityChange($event)"
+                min="1"
+                class="quantity-input"
+              />
+              <button
+                (click)="increaseQuantity()"
+                class="quantity-btn"
+                type="button"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <!-- Bouton d'ajout au panier -->
+          <div class="add-to-cart-section">
+            <button (click)="addToCart()" class="add-to-cart-btn" type="button">
+              <span class="cart-icon">🛒</span>
+              Ajouter au panier ({{ quantity }})
+            </button>
+          </div>
+
+          <!-- Informations supplémentaires -->
+          <div class="product-meta">
+            <div class="meta-item">
+              <span class="meta-label">Référence:</span>
+              <span class="meta-value">{{ product._id }}</span>
+            </div>
+            <div class="meta-item" *ngIf="product.createdAt">
+              <span class="meta-label">Ajouté le:</span>
+              <span class="meta-value">{{
+                product.createdAt | date : "dd/MM/yyyy"
+              }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<app-modal
+  [isOpen]="showConfirmModal"
+  [title]="'Confirmation de suppression'"
+  (closeModal)="toggleConfirmDelete()"
+>
+  <h4 *ngIf="userRole !== 'USER' && isRestricted">
+    Vous n'avez pas les droits nécessaires pour supprimer votre compte. Cette
+    fonctionnalité est réservée aux comptes clients.
+  </h4>
+  <h4 *ngIf="userRole === 'USER' || !isRestricted">
+    Êtes-vous sûr de vouloir supprimer {{ endTitle }}
+  </h4>
+  <div class="modal-actions">
+    <app-button
+      *ngIf="userRole === 'USER' || !isRestricted"
+      [config]="{
+        style: 'save',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Oui'
+      }"
+      (onClick)="deleteUser()"
+    />
+    <app-button
+      *ngIf="userRole === 'USER' || !isRestricted"
+      [config]="{
+        style: 'cancel',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Non'
+      }"
+      (onClick)="toggleConfirmDelete()"
+    />
+    <app-button
+      *ngIf="userRole !== 'USER' && isRestricted"
+      [config]="{
+        style: 'cancel',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Fermer'
+      }"
+      (onClick)="toggleConfirmDelete()"
+    />
+  </div>
+</app-modal>

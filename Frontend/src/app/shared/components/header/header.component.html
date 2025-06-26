@@ -1,0 +1,87 @@
+<header class="mat-elevation-z4">
+  <div class="header-container">
+    <a routerLink="/" class="logo">
+      <img src="assets/images/LogoManageShop.png" alt="ManageShop Logo" />
+    </a>
+
+    <div class="auth-buttons" *ngIf="!isLoggedIn()">
+      <button mat-button class="action-button" routerLink="/auth/login">
+        <mat-icon>login</mat-icon>
+        <span>Se connecter</span>
+      </button>
+      <button mat-button class="action-button" routerLink="/auth/signup">
+        <mat-icon>person_add</mat-icon>
+        <span>S'inscrire</span>
+      </button>
+    </div>
+
+    <div class="user-actions" *ngIf="isLoggedIn()">
+      <button
+        mat-button
+        *ngIf="
+          getUserRole() === 'ADMIN_STORE' || getUserRole() === 'SUPER_ADMIN'
+        "
+        routerLink="/my-store"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="action-button"
+      >
+        <mat-icon>store</mat-icon>
+        <span>Ma Boutique</span>
+      </button>
+      <button
+        mat-button
+        *ngIf="getUserRole() === 'SUPER_ADMIN'"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="action-button"
+      >
+        <mat-icon>settings</mat-icon>
+        <span>Administration</span>
+      </button>
+
+      <div class="profile-menu">
+        <button
+          mat-button
+          [matMenuTriggerFor]="profileMenu"
+          class="profile-button"
+        >
+          <mat-icon class="profile-icon">account_circle</mat-icon>
+          <mat-icon class="arrow-icon">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #profileMenu="matMenu">
+          <button
+            mat-menu-item
+            routerLink="user/profile"
+            routerLinkActive="active"
+          >
+            <mat-icon>person</mat-icon>
+            <span>Mon Profil</span>
+          </button>
+          <button
+            mat-menu-item
+            routerLink="user/cart"
+            routerLinkActive="active"
+          >
+            <mat-icon>shopping_cart</mat-icon>
+            <span>Mon Panier</span>
+          </button>
+          <button
+            mat-menu-item
+            routerLink="user/orders"
+            routerLinkActive="active"
+          >
+            <mat-icon>receipt_long</mat-icon>
+            <span>Mes Commandes</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Se déconnecter</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+</header>

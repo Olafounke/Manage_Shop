@@ -1,0 +1,199 @@
+@use "sass:map";
+@use "sass:color";
+
+$btn-colors: (
+  save: (
+    bg: #2e7d323c,
+    color: #48d14f,
+    hover: color.scale(#2e7d323c, $lightness: 10%),
+    border: 1px solid #48d14f,
+    shadow: none,
+  ),
+  cancel: (
+    bg: #7777773d,
+    color: #acacac,
+    hover: color.scale(#7777773d, $lightness: 10%),
+    border: 1px solid #acacac,
+    shadow: none,
+  ),
+  delete: (
+    bg: #8d2b2a4c,
+    color: #ef5350,
+    hover: color.scale(#8d2b2a4c, $lightness: 10%),
+    border: 1px solid #ef5350,
+    shadow: none,
+  ),
+  add: (
+    bg: #50859e3c,
+    color: #d6f2ff,
+    hover: color.scale(#50859e3c, $lightness: 10%),
+    border: 1px solid #d6f2ff,
+    shadow: none,
+  ),
+  edit: (
+    bg: #a16e2251,
+    color: #ffa726,
+    hover: color.scale(#a16e2251, $lightness: 10%),
+    border: 1px solid #ffa726,
+    shadow: none,
+  ),
+  default: (
+    bg: #acb9c653,
+    color: #ebebeb,
+    hover: color.scale(#acb9c653, $lightness: 10%),
+    border: 1px solid #ebebeb,
+    shadow: none,
+  ),
+);
+
+$btn-sizes: (
+  small: (
+    padding: 4px 10px,
+    font-size: 14px,
+    icon-size: 18px,
+  ),
+  medium: (
+    padding: 8px 18px,
+    font-size: 16px,
+    icon-size: 24px,
+  ),
+  big: (
+    padding: 12px 28px,
+    font-size: 18px,
+    icon-size: 28px,
+  ),
+);
+
+:host {
+  display: inline-block;
+
+  &.full-width {
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+button {
+  border-radius: 8px;
+  box-shadow: none;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  outline: none;
+  &:hover:not(:disabled) {
+    filter: brightness(0.98);
+    box-shadow: 0 2px 8px 0 rgba(44, 62, 80, 0.08);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  mat-icon {
+    vertical-align: middle;
+  }
+}
+
+@each $style, $colors in $btn-colors {
+  .btn-#{$style} {
+    background-color: map.get($colors, "bg") !important;
+    color: map.get($colors, "color") !important;
+    border: map.get($colors, "border");
+    box-shadow: map.get($colors, "shadow");
+    &:hover:not(:disabled) {
+      background-color: map.get($colors, "hover") !important;
+    }
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+@each $size, $props in $btn-sizes {
+  .btn-#{$size} {
+    padding: map.get($props, "padding");
+    font-size: map.get($props, "font-size");
+    mat-icon {
+      font-size: map.get($props, "icon-size");
+      width: map.get($props, "icon-size");
+      height: map.get($props, "icon-size");
+    }
+  }
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  min-width: unset !important;
+  padding: 8px !important;
+  border-radius: 50% !important;
+  line-height: 0;
+  mat-icon {
+    margin: 0;
+  }
+}
+
+.btn-text {
+  mat-icon {
+    display: none;
+  }
+}
+
+.btn-icon\+text {
+  mat-icon {
+    margin-right: 8px;
+  }
+
+  &.responsive {
+    @media (max-width: 768px) {
+      .btn-small {
+        height: 40px;
+        width: 40px;
+      }
+    }
+    @media (max-width: 600px) {
+      mat-icon {
+        margin-right: 0;
+      }
+      span {
+        display: none;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  button {
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  .btn-big {
+    font-size: 15px;
+    padding: 8px 16px;
+  }
+  .btn-medium {
+    height: 34px;
+    width: 34px;
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+  .btn-small {
+    height: 34px;
+    width: 34px;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .btn-icon\+text,
+  .btn-text {
+    width: 100%;
+  }
+}

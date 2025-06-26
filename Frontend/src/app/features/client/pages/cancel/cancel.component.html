@@ -1,0 +1,38 @@
+<div class="cancel-container">
+  <div class="cancel-card">
+    <div class="cancel-content">
+      <div class="cancel-icon">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M18 6L6 18M6 6L18 18"
+            stroke="#EF4444"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <h1>Paiement annulé</h1>
+      <p>
+        Votre paiement a été annulé. Aucun montant n'a été débité de votre
+        compte.
+      </p>
+      <p class="info">Vous pouvez réessayer votre commande à tout moment.</p>
+
+      <div class="actions">
+        <button class="btn btn-primary" (click)="goToCart()">
+          Retour au panier
+        </button>
+        <button class="btn btn-secondary" (click)="goToHome()">
+          Retour à l'accueil
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

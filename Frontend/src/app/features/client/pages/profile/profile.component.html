@@ -1,0 +1,143 @@
+<main>
+  <div class="profile-header">
+    <h1 class="profile-title">Mon Profil</h1>
+  </div>
+
+  <div class="profile-content" *ngIf="user">
+    <div class="profile-info">
+      <div class="info-group">
+        <div class="navigation-buttons">
+          <app-button
+            [config]="{
+              style: 'default',
+              type: 'button',
+              size: 'medium',
+              display: 'text',
+              text: 'Mon Panier'
+            }"
+            (onClick)="navigateToCart()"
+          />
+          <app-button
+            [config]="{
+              style: 'default',
+              type: 'button',
+              size: 'medium',
+              display: 'text',
+              text: 'Mes Commandes'
+            }"
+            (onClick)="navigateToOrders()"
+          />
+        </div>
+      </div>
+      <div class="info-group">
+        <div class="info-header">
+          <h3>Informations Personnelles</h3>
+          <div class="edit-actions" *ngIf="!isEditMode">
+            <app-button
+              [config]="{
+                style: 'edit',
+                type: 'button',
+                size: 'small',
+                display: 'icon+text',
+                text: 'Modifier',
+                icon: 'edit'
+              }"
+              (onClick)="toggleEditMode()"
+            />
+          </div>
+          <div class="edit-actions" *ngIf="isEditMode">
+            <app-button
+              [config]="{
+                style: 'save',
+                type: 'button',
+                size: 'small',
+                display: 'text',
+                text: 'Sauvegarder'
+              }"
+              (onClick)="updateProfile()"
+            />
+            <app-button
+              [config]="{
+                style: 'cancel',
+                type: 'button',
+                size: 'small',
+                display: 'text',
+                text: 'Annuler'
+              }"
+              (onClick)="toggleEditMode()"
+            />
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="label">Email:</span>
+          <input
+            *ngIf="isEditMode"
+            type="email"
+            [(ngModel)]="editForm.email"
+            class="form-input"
+          />
+          <span *ngIf="!isEditMode" class="value">{{ user.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Prénom:</span>
+          <input
+            *ngIf="isEditMode"
+            type="text"
+            [(ngModel)]="editForm.firstName"
+            class="form-input"
+          />
+          <span *ngIf="!isEditMode" class="value">{{ user.firstName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Nom:</span>
+          <input
+            *ngIf="isEditMode"
+            type="text"
+            [(ngModel)]="editForm.lastName"
+            class="form-input"
+          />
+          <span *ngIf="!isEditMode" class="value">{{ user.lastName }}</span>
+        </div>
+        <mat-divider class="section-divider"></mat-divider>
+        <div class="info-header">
+          <h3>Mot de passe</h3>
+        </div>
+        <app-button
+          [config]="{
+            style: 'edit',
+            type: 'button',
+            size: 'medium',
+            display: 'text',
+            text: 'Modifier mon mot de passe'
+          }"
+          (onClick)="toggleEditPassword(user._id!)"
+        />
+      </div>
+      <div class="info-group">
+        <div class="info-header">
+          <h3>Suppression du compte</h3>
+        </div>
+        <app-button
+          [config]="{
+            style: 'delete',
+            type: 'button',
+            size: 'medium',
+            display: 'icon+text',
+            text: 'Supprimer mon compte',
+            icon: 'delete'
+          }"
+          (onClick)="toggleConfirmDelete(user._id!)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <app-confirm-delete-modal
+    (refreshUsers)="refreshAfterDelete()"
+    endTitle="votre compte ?"
+    [userRole]="user.role || ''"
+    [isRestricted]="true"
+  />
+
+  <app-edit-password-modal (updateUser)="updatePassword($event)" />
+</main>

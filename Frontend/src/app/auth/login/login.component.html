@@ -1,0 +1,67 @@
+<main>
+  <h2>Connexion</h2>
+  <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+    <div class="form-group">
+      <label for="email">Email *</label>
+      <input
+        type="email"
+        id="email"
+        #emailInput="ngModel"
+        [(ngModel)]="email"
+        name="email"
+        required
+        email
+      />
+      <div
+        class="validation-error"
+        *ngIf="emailInput.invalid && (emailInput.dirty || emailInput.touched)"
+      >
+        <p *ngIf="emailInput.errors?.['required']">L'email est requis</p>
+        <p *ngIf="emailInput.errors?.['email']">
+          Veuillez entrer un email valide
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Mot de passe *</label>
+      <input
+        type="password"
+        id="password"
+        #passwordInput="ngModel"
+        [(ngModel)]="password"
+        name="password"
+        required
+      />
+      <div
+        class="validation-error"
+        *ngIf="
+          passwordInput.invalid &&
+          (passwordInput.dirty || passwordInput.touched)
+        "
+      >
+        <p *ngIf="passwordInput.errors?.['required']">
+          Le mot de passe est requis
+        </p>
+      </div>
+    </div>
+
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <div class="form-footer">
+      <app-button
+        [config]="{
+          style: 'default',
+          type: 'submit',
+          size: 'big',
+          display: 'text',
+          disabled: !loginForm.form.valid,
+          text: 'Se connecter',
+        }"
+      />
+      <p class="required-fields" *ngIf="!loginForm.form.valid">
+        * Champs obligatoires
+      </p>
+    </div>
+  </form>
+</main>

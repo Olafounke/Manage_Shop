@@ -1,0 +1,80 @@
+<app-modal
+  [isOpen]="showEditModal"
+  [title]="'Modifier l\'utilisateur'"
+  (closeModal)="toggleEditUser()"
+>
+  <form *ngIf="editingModalUser" (ngSubmit)="updateUserHandler()">
+    <div class="form-group">
+      <label for="edit-email">Email</label>
+      <input
+        type="email"
+        id="edit-email"
+        [(ngModel)]="editingModalUser.email"
+        name="email"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="edit-firstName">Prénom</label>
+      <input
+        type="text"
+        id="edit-firstName"
+        [(ngModel)]="editingModalUser.firstName"
+        name="firstName"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="edit-lastName">Nom</label>
+      <input
+        type="text"
+        id="edit-lastName"
+        [(ngModel)]="editingModalUser.lastName"
+        name="lastName"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="edit-role">Mot de passe</label>
+      <app-button
+        [config]="{
+          style: 'default',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Modifier'
+        }"
+        (onClick)="toggleEditPasswordHandler(editingModalUser._id!)"
+      />
+    </div>
+    <div class="form-group">
+      <label for="edit-role">Rôle</label>
+      <select id="edit-role" [(ngModel)]="editingModalUser.role" name="role">
+        <option *ngFor="let role of availableRoles" [value]="role">
+          {{ role }}
+        </option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'submit',
+          size: 'medium',
+          display: 'text',
+          text: 'Enregistrer'
+        }"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleEditUser()"
+      />
+    </div>
+  </form>
+</app-modal>
