@@ -1,0 +1,109 @@
+<main class="cart-container">
+  <div class="cart-header">
+    <h1>Mon Panier</h1>
+    <p *ngIf="cart && cart.items && cart.items.length > 0">
+      Total: {{ getTotalItems() }} article(s)
+    </p>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading">
+    <p>Chargement du panier...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+    <app-button [config]="getRetryButtonConfig()" (onClick)="loadCart()">
+    </app-button>
+  </div>
+
+  <!-- Empty cart -->
+  <div
+    *ngIf="
+      !loading && !error && (!cart || !cart.items || cart.items.length === 0)
+    "
+    class="empty-cart"
+  >
+    <h2>Votre panier est vide</h2>
+    <p>Ajoutez des produits pour commencer vos achats</p>
+    <app-button [config]="getContinueShoppingButtonConfig()" routerLink="/">
+    </app-button>
+  </div>
+
+  <!-- Cart items -->
+  <div
+    *ngIf="!loading && !error && cart && cart.items && cart.items.length > 0"
+    class="cart-content"
+  >
+    <div class="cart-items">
+      <div *ngFor="let item of cart.items" class="cart-item">
+        <div class="item-info">
+          <h3>Produit ID: {{ item.product }}</h3>
+          <p class="item-price">
+            {{ item.price | currency : "EUR" : "symbol" : "1.2-2" }}
+          </p>
+        </div>
+
+        <div class="item-actions">
+          <div class="quantity-controls">
+            <button
+              (click)="updateQuantity(item.product, item.quantity - 1)"
+              class="quantity-btn"
+              [disabled]="loading"
+            >
+              -
+            </button>
+            <span class="quantity">{{ item.quantity }}</span>
+            <button
+              (click)="updateQuantity(item.product, item.quantity + 1)"
+              class="quantity-btn"
+              [disabled]="loading"
+            >
+              +
+            </button>
+          </div>
+
+          <button
+            (click)="removeItem(item.product)"
+            class="remove-btn"
+            [disabled]="loading"
+          >
+            Supprimer
+          </button>
+        </div>
+
+        <div class="item-total">
+          <p>
+            {{
+              item.price * item.quantity | currency : "EUR" : "symbol" : "1.2-2"
+            }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart summary -->
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Sous-total:</span>
+        <span>{{ cart.total | currency : "EUR" : "symbol" : "1.2-2" }}</span>
+      </div>
+
+      <div class="summary-actions">
+        <app-button
+          [config]="getClearCartButtonConfig()"
+          (onClick)="clearCart()"
+        >
+        </app-button>
+
+        <app-button
+          [config]="getCheckoutButtonConfig()"
+          (onClick)="proceedToCheckout()"
+        >
+        </app-button>
+        <app-checkout></app-checkout>
+      </div>
+    </div>
+  </div>
+</main>

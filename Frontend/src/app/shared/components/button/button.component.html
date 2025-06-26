@@ -1,0 +1,24 @@
+<button
+  mat-button
+  [type]="config.type"
+  [ngClass]="getButtonClasses()"
+  [disabled]="config.disabled"
+  (click)="onClick.emit($event)"
+>
+  <mat-icon
+    *ngIf="
+      config.icon &&
+      (config.display === 'icon' || config.display === 'icon+text')
+    "
+  >
+    {{ config.icon }}
+  </mat-icon>
+  <span
+    *ngIf="
+      config.text &&
+      (config.display === 'text' || config.display === 'icon+text')
+    "
+  >
+    {{ config.text }}
+  </span>
+</button>

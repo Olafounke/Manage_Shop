@@ -1,0 +1,82 @@
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th *ngFor="let column of columns" [ngClass]="column.key + '-col'">
+          {{ column.header }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of data">
+        <td *ngFor="let column of columns" [ngClass]="column.key + '-col'">
+          <ng-container [ngSwitch]="column.type">
+            <!-- Select -->
+            <ng-container *ngSwitchCase="'select'">
+              <select
+                *ngIf="isEditing(item)"
+                [ngModel]="getValue(item, column.key)"
+                (ngModelChange)="onEditChange(item, column.key, $event)"
+              >
+                <option *ngFor="let option of column.options" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+              <span *ngIf="!isEditing(item)">{{
+                getValue(item, column.key)
+              }}</span>
+            </ng-container>
+
+            <!-- Actions -->
+            <div *ngSwitchCase="'actions'" class="actions">
+              <ng-container *ngIf="column.template === 'passwordTemplate'">
+                <ng-container
+                  *ngTemplateOutlet="
+                    passwordTemplate;
+                    context: { $implicit: item }
+                  "
+                >
+                </ng-container>
+              </ng-container>
+              <ng-container *ngIf="column.template === 'actionsTemplate'">
+                <ng-container
+                  *ngTemplateOutlet="
+                    actionsTemplate;
+                    context: { $implicit: item }
+                  "
+                >
+                </ng-container>
+              </ng-container>
+            </div>
+
+            <!-- Text -->
+            <ng-container *ngSwitchDefault>
+              <input
+                *ngIf="isEditing(item)"
+                type="text"
+                [ngModel]="getValue(item, column.key)"
+                (ngModelChange)="onEditChange(item, column.key, $event)"
+                class="edit-input"
+              />
+              <span *ngIf="!isEditing(item)">{{
+                getValue(item, column.key)
+              }}</span>
+            </ng-container>
+          </ng-container>
+        </td>
+      </tr>
+
+      <!-- Message si aucune donnée -->
+      <tr *ngIf="!isLoading && (!data || data.length === 0)">
+        <td [attr.colspan]="columns.length" class="no-data">
+          Aucune donnée disponible
+        </td>
+      </tr>
+
+      <!-- Loading state -->
+      <tr *ngIf="isLoading">
+        <td [attr.colspan]="columns.length" class="loading">Chargement...</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

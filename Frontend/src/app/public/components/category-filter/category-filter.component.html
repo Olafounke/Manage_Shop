@@ -1,0 +1,31 @@
+<div class="category-filter">
+  <div class="filter-header">
+    <h3>Filtrer par catégorie</h3>
+    <button
+      *ngIf="selectedCategory"
+      (click)="clearFilter()"
+      class="clear-filter-btn"
+      type="button"
+    >
+      Effacer
+    </button>
+  </div>
+
+  <div class="categories-container">
+    <div
+      *ngFor="let category of categories"
+      class="category-item"
+      [class.active]="selectedCategory === category"
+      (click)="onCategoryChange(category)"
+    >
+      <span class="category-name">{{ category }}</span>
+      <span *ngIf="selectedCategory === category" class="check-icon">✓</span>
+    </div>
+
+    <div *ngIf="loading" class="loading">Chargement des catégories...</div>
+
+    <div *ngIf="!loading && categories.length === 0" class="no-categories">
+      Aucune catégorie disponible
+    </div>
+  </div>
+</div>

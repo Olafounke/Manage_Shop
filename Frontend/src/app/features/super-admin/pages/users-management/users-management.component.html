@@ -1,0 +1,104 @@
+<div class="users-management-header">
+  <h1>Gestion des utilisateurs</h1>
+  <app-button
+    [config]="{
+      style: 'add',
+      type: 'button',
+      size: 'medium',
+      display: 'icon+text',
+      text: 'Ajouter un utilisateur',
+      icon: 'person_add'
+    }"
+    [responsive]="true"
+    (onClick)="toggleAddUser()"
+  />
+</div>
+
+<app-table
+  [columns]="tableColumns"
+  [data]="users"
+  [editingItem]="editingUser"
+  (editChange)="onEditChange($event)"
+>
+  <ng-template #actionsTemplate let-item>
+    <ng-container *ngIf="!editingUser || editingUser._id !== item._id">
+      <app-button
+        [config]="{
+          style: 'edit',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'edit'
+        }"
+        (onClick)="toggleEditUser(item)"
+      />
+      <app-button
+        [config]="{
+          style: 'delete',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'delete'
+        }"
+        (onClick)="toggleConfirmDelete(item._id!)"
+      />
+    </ng-container>
+
+    <ng-container
+      *ngIf="!isResponsive && editingUser && editingUser._id === item._id"
+    >
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Sauvegarder'
+        }"
+        (onClick)="updateUser()"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleEditUser()"
+      />
+    </ng-container>
+  </ng-template>
+
+  <ng-template #passwordTemplate let-item>
+    <app-button
+      [config]="{
+        style: 'edit',
+        type: 'button',
+        size: 'small',
+        display: 'text',
+        text: 'Modifier'
+      }"
+      (onClick)="toggleEditPassword(item._id!)"
+    />
+  </ng-template>
+</app-table>
+
+<app-add-user-modal
+  [availableRoles]="availableRoles"
+  (toggleAddUser)="toggleAddUser()"
+  (refreshUsers)="getAllUsers()"
+/>
+
+<app-edit-user-modal
+  [availableRoles]="availableRoles"
+  (updateUser)="updateUser()"
+  (toggleEditPassword)="toggleEditPassword($event)"
+/>
+
+<app-edit-password-modal (updateUser)="updateUser($event)" />
+
+<app-confirm-delete-modal
+  (refreshUsers)="refreshAfterDelete($event)"
+  endTitle="cet utilisateur ?"
+/>

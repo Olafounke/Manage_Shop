@@ -1,0 +1,40 @@
+.form-group {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  input {
+    width: calc(100% - 1rem) !important;
+  }
+
+  input,
+  select {
+    background: rgba(44, 53, 68, 0.85);
+    color: #fff;
+    border: 1px solid #64748b;
+    border-radius: 5px;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(31, 38, 135, 0.07);
+    width: 100%;
+
+    &:focus {
+      border: 1.5px solid #3b82f6;
+      box-shadow: 0 4px 12px rgba(31, 38, 135, 0.12);
+      background: rgba(44, 53, 68, 1);
+    }
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

@@ -1,0 +1,76 @@
+<div class="success-container">
+  <div class="success-card">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Vérification du paiement en cours...</p>
+    </div>
+
+    <div
+      *ngIf="!isLoading && paymentStatus === 'success'"
+      class="success-content"
+    >
+      <div class="success-icon">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+            stroke="#10B981"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <h1>Paiement réussi !</h1>
+      <p>
+        Votre commande a été confirmée et sera traitée dans les plus brefs
+        délais.
+      </p>
+      <p class="session-info">Session ID: {{ sessionId }}</p>
+      <p *ngIf="orderId" class="order-info">Commande ID: {{ orderId }}</p>
+
+      <div class="actions">
+        <button class="btn btn-primary" (click)="goToOrders()">
+          Voir mes commandes
+        </button>
+        <button class="btn btn-secondary" (click)="goToHome()">
+          Retour à l'accueil
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && paymentStatus === 'error'" class="error-content">
+      <div class="error-icon">
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+            stroke="#EF4444"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+      <h1>Erreur de paiement</h1>
+      <p>{{ errorMessage }}</p>
+      <p *ngIf="sessionId" class="session-info">Session ID: {{ sessionId }}</p>
+
+      <div class="actions">
+        <button class="btn btn-primary" (click)="goToHome()">
+          Retour à l'accueil
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

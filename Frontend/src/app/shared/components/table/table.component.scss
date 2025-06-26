@@ -1,0 +1,146 @@
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 0;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(30, 41, 59, 0.7) 60%,
+    rgba(51, 65, 85, 0.5) 100%
+  );
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+
+    th,
+    td {
+      padding: 1.2rem 0.2rem;
+      text-align: center;
+      border-bottom: 1px solid #717171;
+      font-size: 1.05rem;
+      color: #fff !important;
+      @media (max-width: 768px) {
+        font-size: 0.95rem;
+        padding: 0.6rem 0.6rem;
+      }
+    }
+
+    th {
+      background: rgba(44, 53, 68, 0.85);
+      font-weight: 700;
+      color: #fff !important;
+      border-top: none;
+      border-bottom: 2px solid #64748b;
+    }
+
+    tbody > tr {
+      transition: background 0.2s;
+      &:hover {
+        background: rgba(44, 53, 68, 0.4);
+      }
+    }
+
+    td {
+      vertical-align: middle;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-btn {
+      border: none;
+      background: #f4f6fb;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(31, 38, 135, 0.07);
+
+      &:hover {
+        background: #e0e7ff;
+        box-shadow: 0 4px 12px rgba(31, 38, 135, 0.12);
+      }
+
+      &.edit {
+        color: #3b82f6;
+      }
+      &.delete {
+        color: #ef4444;
+      }
+    }
+
+    .no-data,
+    .loading {
+      text-align: center;
+      padding: 2.5rem;
+      color: #6b7280;
+      font-size: 1.1rem;
+    }
+
+    th.name-col,
+    td.name-col,
+    th.firstName-col,
+    td.firstName-col,
+    th.lastName-col,
+    td.lastName-col,
+    th.password-col,
+    td.password-col {
+      @media (max-width: 1024px) {
+        display: none;
+      }
+    }
+    th.role-col,
+    td.role-col {
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+  }
+}
+
+.edit-input {
+  background: rgba(44, 53, 68, 0.85);
+  color: #fff;
+  border: 1px solid #64748b;
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 6px rgba(31, 38, 135, 0.07);
+  width: 70%;
+
+  &:focus {
+    border: 1.5px solid #3b82f6;
+    box-shadow: 0 4px 12px rgba(31, 38, 135, 0.12);
+    background: rgba(44, 53, 68, 1);
+  }
+}
+
+select {
+  background: rgba(44, 53, 68, 0.85);
+  color: #fff;
+  border: 1px solid #64748b;
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    border: 1.5px solid #3b82f6;
+    background: rgba(44, 53, 68, 1);
+  }
+}
