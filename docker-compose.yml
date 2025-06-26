@@ -1,0 +1,98 @@
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./API_Gateway
+      dockerfile: Dockerfile
+    container_name: ms-api-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=${API_GATEWAY_PORT}
+      - MONGODB_URI=mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${API_GATEWAY_MONGODB_CLUSTER}?${MONGODB_OPTIONS}
+      - CORS_ORIGIN=${CORS_ORIGIN_FRONT_END}
+      - TOKEN_SECRET=${TOKEN_SECRET}
+      - TOKEN_EXPIRATION=${TOKEN_EXPIRATION}
+      - PROOF_OF_WORK_DIFFICULTY=${PROOF_OF_WORK_DIFFICULTY}
+      - BCRYPT_ROUNDS=${BCRYPT_ROUNDS}
+      - PRODUCT_SERVICE_URL=${PRODUCT_SERVICE_URL}
+      - CART_SERVICE_URL=${CART_SERVICE_URL}
+      - ORDER_SERVICE_URL=${ORDER_SERVICE_URL}
+    depends_on:
+      - cart-service
+      - order-service
+      - product-service
+    networks:
+      - manage-shop-network
+
+  # Microservice Carts
+  cart-service:
+    build:
+      context: ./Microservice_carts
+      dockerfile: Dockerfile
+    container_name: ms-cart-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=${CARTS_PORT}
+      - MONGODB_URI=mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${CARTS_MONGODB_CLUSTER}?${MONGODB_OPTIONS}
+      - CORS_ORIGIN=${CORS_ORIGIN_API_GATEWAY}
+    networks:
+      - manage-shop-network
+
+  # Microservice Orders
+  order-service:
+    build:
+      context: ./Microservice_orders
+      dockerfile: Dockerfile
+    container_name: ms-order-service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      - PORT=${ORDERS_PORT}
+      - MONGODB_URI=mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${ORDERS_MONGODB_CLUSTER}?${MONGODB_OPTIONS}
+      - CORS_ORIGIN=${CORS_ORIGIN_API_GATEWAY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+    networks:
+      - manage-shop-network
+
+  # Microservice Products
+  product-service:
+    build:
+      context: ./Microservice_product
+      dockerfile: Dockerfile
+    container_name: ms-product-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=${PRODUCTS_PORT}
+      - MONGODB_URI=mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${PRODUCTS_MONGODB_CLUSTER}?${MONGODB_OPTIONS}
+      - CORS_ORIGIN=${CORS_ORIGIN_API_GATEWAY}
+    networks:
+      - manage-shop-network
+
+  # Frontend Angular
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: manage-shop
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - manage-shop-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  manage-shop-network:
+    driver: bridge
