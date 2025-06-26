@@ -82,8 +82,8 @@ export class OrderService {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:4200/user/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:4200/user/cancel",
+      success_url: "http://localhost:80/user/success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "http://localhost:80/user/cancel",
       metadata: {
         userId,
         cartId: cart._id.toString(),
