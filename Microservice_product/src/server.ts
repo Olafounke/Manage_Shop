@@ -4,7 +4,7 @@ import { AddressInfo } from "net";
 import { environment } from "./config/environment";
 import app from "./app";
 
-const port = environment.PORT || 3100;
+const port = environment.PORT || 3001;
 app.set("port", port);
 
 const errorHandler = (error: NodeJS.ErrnoException): void => {
