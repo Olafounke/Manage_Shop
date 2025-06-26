@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const tokenService = require("./tokenService");
 const { BCRYPT_ROUNDS } = require("../../config/environment");

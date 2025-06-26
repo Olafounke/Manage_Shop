@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const { BCRYPT_ROUNDS } = require("../../config/environment");
 
 const userSchema = new mongoose.Schema(
