@@ -1,0 +1,32 @@
+﻿services:
+  ms_store_paris7:
+    container_name: ms-store-paris7
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      - STORE_ID=7
+      - STORE_NAME=paris7
+      - STORE_ADDRESS=123 rue de Paris7
+      - USER_ID=admin7
+      - PORT=8007
+      - POSTGRES_HOST=${POSTGRES_HOST} 
+      - POSTGRES_PORT=${POSTGRES_PORT} 
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=db-store-paris7 
+    ports:
+      - "8007:8007" 
+  postgres:
+    container_name: ms-postgres-db
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
