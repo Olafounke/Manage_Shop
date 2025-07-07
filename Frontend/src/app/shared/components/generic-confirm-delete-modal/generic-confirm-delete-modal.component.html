@@ -1,0 +1,32 @@
+<app-modal
+  [isOpen]="showConfirmModal"
+  [title]="title"
+  (closeModal)="toggleConfirmDelete()"
+>
+  <h4>
+    Êtes-vous sûr de vouloir supprimer {{ itemType }}
+    <span *ngIf="itemName"> "{{ itemName }}"</span> ?
+  </h4>
+  <div class="modal-actions">
+    <app-button
+      [config]="{
+        style: 'save',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Oui'
+      }"
+      (onClick)="onConfirmDelete()"
+    />
+    <app-button
+      [config]="{
+        style: 'cancel',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Non'
+      }"
+      (onClick)="toggleConfirmDelete()"
+    />
+  </div>
+</app-modal>

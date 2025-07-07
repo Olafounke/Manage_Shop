@@ -1,0 +1,58 @@
+<app-modal
+  [isOpen]="showEditModal"
+  [title]="'Modifier le magasin'"
+  (closeModal)="toggleEditStore()"
+>
+  <form *ngIf="editingModalStore" (ngSubmit)="updateStoreHandler()">
+    <div class="form-group">
+      <label for="edit-storeName">Nom du magasin</label>
+      <input
+        type="text"
+        id="edit-storeName"
+        [(ngModel)]="editingModalStore.storeName"
+        name="storeName"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="edit-storeAddress">Adresse du magasin</label>
+      <input
+        type="text"
+        id="edit-storeAddress"
+        [(ngModel)]="editingModalStore.storeAddress"
+        name="storeAddress"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="edit-userEmail">Email utilisateur (optionnel)</label>
+      <select id="edit-userEmail" [(ngModel)]="selectedEmail" name="userEmail">
+        <option value="">-- Aucun utilisateur --</option>
+        <option *ngFor="let email of availableEmails.slice(1)" [value]="email">
+          {{ email }}
+        </option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'submit',
+          size: 'medium',
+          display: 'text',
+          text: 'Enregistrer'
+        }"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleEditStore()"
+      />
+    </div>
+  </form>
+</app-modal>

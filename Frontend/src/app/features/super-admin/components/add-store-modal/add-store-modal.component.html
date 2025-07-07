@@ -1,0 +1,58 @@
+<app-modal
+  [isOpen]="showAddStoreModal"
+  [title]="'Ajouter un nouveau magasin'"
+  (closeModal)="toggleAddStore()"
+>
+  <form (ngSubmit)="addStore()">
+    <div class="form-group">
+      <label for="storeName">Nom du magasin</label>
+      <input
+        type="text"
+        id="storeName"
+        [(ngModel)]="newStore.storeName"
+        name="storeName"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="storeAddress">Adresse du magasin</label>
+      <input
+        type="text"
+        id="storeAddress"
+        [(ngModel)]="newStore.storeAddress"
+        name="storeAddress"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="userEmail">Email utilisateur (optionnel)</label>
+      <select id="userEmail" [(ngModel)]="selectedEmail" name="userEmail">
+        <option value="">-- Aucun utilisateur --</option>
+        <option *ngFor="let email of availableEmails.slice(1)" [value]="email">
+          {{ email }}
+        </option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'submit',
+          size: 'medium',
+          display: 'text',
+          text: 'Ajouter'
+        }"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleAddStore()"
+      />
+    </div>
+  </form>
+</app-modal>

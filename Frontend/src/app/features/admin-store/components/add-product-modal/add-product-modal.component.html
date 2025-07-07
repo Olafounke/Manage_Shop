@@ -1,0 +1,90 @@
+<app-modal
+  [isOpen]="showAddProductModal"
+  [title]="'Ajouter un nouveau produit'"
+  (closeModal)="toggleAddProduct()"
+>
+  <form (ngSubmit)="addProduct()">
+    <div class="form-group">
+      <label for="productName">Nom du produit</label>
+      <input
+        type="text"
+        id="productName"
+        [(ngModel)]="newProduct.name"
+        name="productName"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="productDescription">Description</label>
+      <textarea
+        id="productDescription"
+        [(ngModel)]="newProduct.description"
+        name="productDescription"
+        rows="3"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="productPrice">Prix (€)</label>
+      <input
+        type="number"
+        id="productPrice"
+        [(ngModel)]="newProduct.price"
+        name="productPrice"
+        min="0"
+        step="0.01"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="productStock">Stock initial</label>
+      <input
+        type="number"
+        id="productStock"
+        [(ngModel)]="newProduct.totalInventory"
+        name="productStock"
+        min="0"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Catégories</label>
+      <div class="categories-checkboxes">
+        <div *ngFor="let category of categories" class="checkbox-item">
+          <input
+            type="checkbox"
+            [id]="'category-' + category"
+            [checked]="isCategorySelected(category)"
+            (change)="onCategoryChangeEvent(category, $event)"
+          />
+          <label [for]="'category-' + category">{{ category }}</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'submit',
+          size: 'medium',
+          display: 'text',
+          text: 'Ajouter'
+        }"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleAddProduct()"
+      />
+    </div>
+  </form>
+</app-modal>
