@@ -1,6 +1,8 @@
-const ProxyService = require("../../services/proxyService");
+const ProxyService = require("../service/proxyService");
 const { orders } = require("../../config/microservices");
-const CartController = require("./cartController");
+const CartService = require("../service/CartService");
+const OrderService = require("../service/orderService");
+const InventoryService = require("../service/inventoryService");
 
 class OrderController {
   static async getUserOrders(req, res) {
@@ -12,19 +14,16 @@ class OrderController {
     }
   }
 
-  static async getOrderById(req, res) {
+  static async getStoreOrders(req, res) {
     try {
-      const endpoint = ProxyService.buildEndpoint(orders.endpoints.detail, { id: req.params.id });
-      const result = await ProxyService.forwardRequest("orders", endpoint, "GET", null, {}, req.user);
-      res.json(result);
-    } catch (error) {
-      res.status(error.status || 500).json({ error: error.message });
-    }
-  }
-
-  static async getOrdersForStoreAdmin(req, res) {
-    try {
-      const result = await ProxyService.forwardRequest("orders", orders.endpoints.storeOrders, "GET");
+      const result = await ProxyService.forwardRequest(
+        "orders",
+        orders.endpoints.storeOrders,
+        "GET",
+        null,
+        {},
+        req.user
+      );
       res.json(result);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
@@ -43,15 +42,34 @@ class OrderController {
 
   static async createCheckoutSession(req, res) {
     try {
-      const cart = await CartController.getCartData(req.user);
+      const { userAddress } = req.body;
+
+      if (!userAddress || !userAddress.street || !userAddress.city || !userAddress.postalCode || !userAddress.country) {
+        return res.status(400).json({
+          error: "Adresse utilisateur complète requise (street, city, postalCode, country)",
+        });
+      }
+
+      const cart = await CartService.getCartData(req.user);
+
+      if (!cart || !cart.items || cart.items.length === 0) {
+        return res.status(400).json({ error: "Panier vide" });
+      }
+
+      const enrichedCart = await OrderService.enrichCartWithNewStructure(cart, req.user.userId, userAddress);
+
       const result = await ProxyService.forwardRequest(
         "orders",
         orders.endpoints.createCheckout,
         "POST",
-        { cart },
+        {
+          cart: enrichedCart,
+        },
         {},
         req.user
       );
+      console.log("result", result);
+
       res.json(result);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
@@ -63,9 +81,16 @@ class OrderController {
       const sessionId = req.params.sessionId;
       const endpoint = ProxyService.buildEndpoint(orders.endpoints.verifyPayment, { sessionId });
       const result = await ProxyService.forwardRequest("orders", endpoint, "GET");
+
       if (result.success) {
-        await CartController.clearCartData(req.user);
+        if (result.inventoryUpdates && Array.isArray(result.inventoryUpdates) && result.inventoryUpdates.length > 0) {
+          for (const update of result.inventoryUpdates) {
+            await InventoryService.decrementInventoryItem(update.storeId, update.productId, update.quantity);
+          }
+        }
+        await CartService.clearCartData(req.user);
       }
+
       res.json(result);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });

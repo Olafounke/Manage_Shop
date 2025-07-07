@@ -4,12 +4,11 @@ const OrderController = require("../controllers/orderController");
 const authMiddleware = require("../../auth/middleware/authMiddleware");
 
 router.get("/", authMiddleware.authenticate, OrderController.getUserOrders);
-router.get("/:id", authMiddleware.authenticate, OrderController.getOrderById);
 router.get(
   "/admin",
   authMiddleware.authenticate,
   authMiddleware.checkRole(["ADMIN_STORE", "SUPER_ADMIN"]),
-  OrderController.getOrdersForStoreAdmin
+  OrderController.getStoreOrders
 );
 router.put(
   "/:id/status",

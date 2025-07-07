@@ -2,10 +2,11 @@ const crypto = require("crypto");
 const { TOKEN_SECRET, TOKEN_EXPIRATION, PROOF_OF_WORK_DIFFICULTY } = require("../../config/environment");
 
 class TokenService {
-  async generateToken(userId, role, req) {
+  async generateToken(userId, role, store, req) {
     const payload = {
       userId: userId,
       role: role,
+      store: store,
       nonce: null,
       proofOfWork: null,
       deviceFingerprint: this.generateDeviceFingerprint(req),

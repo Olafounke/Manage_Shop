@@ -1,7 +1,8 @@
 const tokenService = require("../services/tokenService");
+const authService = require("../services/authService");
 
 class AuthMiddleware {
-  authenticate(req, res, next) {
+  async authenticate(req, res, next) {
     const authHeader = req.headers["authorization"];
     if (!authHeader) return res.status(401).json({ error: "Aucun token fourni" });
     const token = authHeader.split(" ")[1];
@@ -11,6 +12,10 @@ class AuthMiddleware {
     if (!payload) return res.status(401).json({ error: "Token invalide" });
 
     req.user = payload;
+    const user = await authService.getCurrentUser(payload.userId);
+    if (user.store) {
+      req.user.store = user.store;
+    }
     next();
   }
 

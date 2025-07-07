@@ -1,22 +1,14 @@
-const ProxyService = require("../../services/proxyService");
+const ProxyService = require("../service/proxyService");
 const { carts } = require("../../config/microservices");
+const CartService = require("../service/CartService");
 
 class CartController {
   static async getUserCart(req, res) {
     try {
-      const result = await CartController.getCartData(req.user);
+      const result = await CartService.getCartData(req.user);
       res.json(result);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
-    }
-  }
-
-  static async getCartData(user) {
-    try {
-      const result = await ProxyService.forwardRequest("carts", carts.endpoints.list, "GET", null, {}, user);
-      return result;
-    } catch (error) {
-      throw error;
     }
   }
 
@@ -58,18 +50,10 @@ class CartController {
 
   static async clearCart(req, res) {
     try {
-      const result = await CartController.clearCartData(req.user);
+      const result = await CartService.clearCartData(req.user);
       res.json(result);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
-    }
-  }
-  static async clearCartData(user) {
-    try {
-      const result = await ProxyService.forwardRequest("carts", carts.endpoints.delete, "DELETE", null, {}, user);
-      return result;
-    } catch (error) {
-      throw error;
     }
   }
 }

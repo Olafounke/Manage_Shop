@@ -35,7 +35,7 @@ class AuthService {
         throw new Error("Email ou mot de passe incorrect");
       }
 
-      const token = await tokenService.generateToken(user._id, user.role, req);
+      const token = await tokenService.generateToken(user._id, user.role, user.store, req);
 
       await user.save();
 
@@ -48,11 +48,20 @@ class AuthService {
   }
 
   async getCurrentUser(userId) {
-    const user = await User.findById(userId).select("email firstName lastName _id");
+    const user = await User.findById(userId).select("email firstName lastName _id role store");
     if (!user) {
       throw new Error("Utilisateur non trouvé");
     }
     return user;
+  }
+
+  async getAllUsers() {
+    try {
+      const users = await User.find({}).select("email firstName lastName _id role store createdAt updatedAt");
+      return users;
+    } catch (error) {
+      throw new Error(`Erreur lors de la récupération des utilisateurs: ${error.message}`);
+    }
   }
 
   async updateUser(userId, userData) {
@@ -61,6 +70,19 @@ class AuthService {
         userData.password = await bcrypt.hash(userData.password, BCRYPT_ROUNDS);
       }
 
+      const updatedUser = await User.findByIdAndUpdate(userId, { ...userData }, { new: true });
+      if (!updatedUser) {
+        throw new Error("Utilisateur non trouvé");
+      }
+
+      return updatedUser;
+    } catch (error) {
+      throw new Error(`Erreur lors de la mise à jour de l'utilisateur: ${error.message}`);
+    }
+  }
+
+  async updateRoleOnly(userId, userData) {
+    try {
       const updatedUser = await User.findByIdAndUpdate(userId, { ...userData }, { new: true });
       if (!updatedUser) {
         throw new Error("Utilisateur non trouvé");

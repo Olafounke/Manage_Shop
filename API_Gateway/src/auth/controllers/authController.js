@@ -1,5 +1,6 @@
 const authService = require("../services/authService");
 const User = require("../models/userModel");
+const StoreService = require("../../api/service/storeService");
 
 class AuthController {
   async register(req, res) {
@@ -55,13 +56,12 @@ class AuthController {
   }
 
   async getAllUsers(req, res) {
-    User.find()
-      .then((users) => {
-        res.status(200).json(users);
-      })
-      .catch((error) => {
-        res.status(500).json({ error });
-      });
+    try {
+      const users = await authService.getAllUsers();
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
 
   async updateUser(req, res) {
@@ -69,13 +69,39 @@ class AuthController {
       const userId = req.params.id;
       const userData = req.body;
 
-      await authService.updateUser(userId, userData);
+      const currentUser = await authService.getCurrentUser(userId);
+      console.log("currentUser", currentUser);
+      console.log("userData", userData);
+      console.log("userId", userId);
+      await StoreService.handleUserStoreChanges(userId, currentUser, userData);
+
+      const updatedUser = await authService.updateUser(userId, userData);
 
       res.status(200).json({
         message: "Utilisateur mis à jour avec succès",
+        user: {
+          _id: updatedUser._id,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          store: updatedUser.store,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+        },
       });
     } catch (error) {
-      res.status(error.message.includes("non trouvé") ? 404 : 500).json({ message: error.message });
+      let statusCode = 500;
+
+      if (error.message.includes("non trouvé")) {
+        statusCode = 404;
+      } else if (
+        error.message.includes("déjà assigné") ||
+        error.message.includes("requis") ||
+        error.message.includes("pas encore déployé")
+      ) {
+        statusCode = 400;
+      }
+
+      res.status(statusCode).json({ message: error.message });
     }
   }
 
