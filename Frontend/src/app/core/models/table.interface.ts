@@ -4,4 +4,5 @@ export interface TableColumn {
   type?: 'text' | 'select' | 'actions';
   options?: string[];
   template?: string;
+  editable?: boolean;
 }

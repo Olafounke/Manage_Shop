@@ -6,9 +6,12 @@ export interface Product {
   images?: string[];
   categories?: string[];
   owner: string;
+  stores: string[];
   customFields?: Record<string, any>;
-  createdAt?: string;
-  updatedAt?: string;
+  totalInventory?: number;
+  inStock?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ProductResponse {
