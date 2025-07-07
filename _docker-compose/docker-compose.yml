@@ -1,8 +1,14 @@
+# Fichier principal - Services fixes uniquement
+# Les magasins et PostgreSQL sont dans des fichiers séparés
+include:
+  - docker-compose.stores.yml # Magasins (généré dynamiquement)
+  - docker-compose.postgres.yml # PostgreSQL
+
 services:
   # API Gateway
   api-gateway:
     build:
-      context: ./API_Gateway
+      context: ../API_Gateway
       dockerfile: Dockerfile
     container_name: ms-api-gateway
     restart: unless-stopped
@@ -19,17 +25,20 @@ services:
       - PRODUCT_SERVICE_URL=${PRODUCT_SERVICE_URL}
       - CART_SERVICE_URL=${CART_SERVICE_URL}
       - ORDER_SERVICE_URL=${ORDER_SERVICE_URL}
+      - STORE_SERVICE_URL=${STORE_SERVICE_URL}
+      - TRANSFERT_SERVICE_URL=${TRANSFERT_SERVICE_URL}
     depends_on:
       - cart-service
       - order-service
       - product-service
+      - transfert-service
     networks:
       - manage-shop-network
 
   # Microservice Carts
   cart-service:
     build:
-      context: ./Microservice_carts
+      context: ../Microservice_carts
       dockerfile: Dockerfile
     container_name: ms-cart-service
     restart: unless-stopped
@@ -45,7 +54,7 @@ services:
   # Microservice Orders
   order-service:
     build:
-      context: ./Microservice_orders
+      context: ../Microservice_orders
       dockerfile: Dockerfile
     container_name: ms-order-service
     restart: unless-stopped
@@ -62,7 +71,7 @@ services:
   # Microservice Products
   product-service:
     build:
-      context: ./Microservice_product
+      context: ../Microservice_product
       dockerfile: Dockerfile
     container_name: ms-product-service
     restart: unless-stopped
@@ -75,10 +84,26 @@ services:
     networks:
       - manage-shop-network
 
+  # Microservice Transferts
+  transfert-service:
+    build:
+      context: ../Microservice_transfert
+      dockerfile: Dockerfile
+    container_name: ms-transfert-service
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=${TRANSFERTS_PORT}
+      - MONGODB_URI=mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${TRANSFERTS_MONGODB_CLUSTER}?${MONGODB_OPTIONS}
+      - CORS_ORIGIN=${CORS_ORIGIN_API_GATEWAY}
+    networks:
+      - manage-shop-network
+
   # Frontend Angular
   frontend:
     build:
-      context: ./Frontend
+      context: ../Frontend
       dockerfile: Dockerfile
     container_name: manage-shop
     restart: unless-stopped
@@ -88,9 +113,15 @@ services:
       - api-gateway
     networks:
       - manage-shop-network
+    volumes:
+      - ../Frontend:/Frontend
+      - /Frontend/node_modules
+    command: yarn start
 
 volumes:
   mongodb_data:
+    driver: local
+  pgdata:
     driver: local
 
 networks:

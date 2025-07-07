@@ -1,0 +1,86 @@
+﻿# Generated: 2025-07-07 21:04:18
+services:
+
+  ms_store_magasin-2:
+    container_name: ms-store-magasin-2
+    build:
+      context: ../Microservice_store
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      ms-postgres-db:
+        condition: service_healthy
+    environment:
+      - STORE_ID=2aadd47a
+      - STORE_NAME=Magasin 2
+      - STORE_NAME_SLUG=magasin-2
+      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
+      - STORE_LONGITUDE=Decimal128(
+      - STORE_LATITUDE=Decimal128(
+      - USER_ID=
+      - PORT=8002
+      - POSTGRES_HOST=ms-postgres-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=db-store-magasin-2
+    ports:
+      - "8002:8002"
+    networks:
+      - manage-shop-network
+
+  ms_store_magasin-3:
+    container_name: ms-store-magasin-3
+    build:
+      context: ../Microservice_store
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      ms-postgres-db:
+        condition: service_healthy
+    environment:
+      - STORE_ID=533e9db5
+      - STORE_NAME=Magasin 3
+      - STORE_NAME_SLUG=magasin-3
+      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
+      - STORE_LONGITUDE=Decimal128(
+      - STORE_LATITUDE=Decimal128(
+      - USER_ID=68528747130544406e053d65
+      - PORT=8003
+      - POSTGRES_HOST=ms-postgres-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=db-store-magasin-3
+    ports:
+      - "8003:8003"
+    networks:
+      - manage-shop-network
+
+  ms_store_magasin-1:
+    container_name: ms-store-magasin-1
+    build:
+      context: ../Microservice_store
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      ms-postgres-db:
+        condition: service_healthy
+    environment:
+      - STORE_ID=9bbdf4e5
+      - STORE_NAME=Magasin 1
+      - STORE_NAME_SLUG=magasin-1
+      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
+      - STORE_LONGITUDE=Decimal128(
+      - STORE_LATITUDE=Decimal128(
+      - USER_ID=
+      - PORT=8001
+      - POSTGRES_HOST=ms-postgres-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=db-store-magasin-1
+    ports:
+      - "8001:8001"
+    networks:
+      - manage-shop-network
