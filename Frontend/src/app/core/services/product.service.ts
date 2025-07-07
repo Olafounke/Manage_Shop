@@ -6,6 +6,7 @@ import {
   ProductResponse,
   ProductFilters,
 } from '../models/product.interface';
+
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -16,7 +17,6 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  // Récupérer tous les produits avec filtres et pagination
   getProducts(filters: ProductFilters = {}): Observable<ProductResponse> {
     let params = new HttpParams();
 
@@ -42,7 +42,10 @@ export class ProductService {
     return this.http.get<ProductResponse>(this.apiUrl, { params });
   }
 
-  // Récupérer les produits par catégorie
+  getMyProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/my-products`);
+  }
+
   getProductsByCategory(
     categorySlug: string,
     page: number = 1,
@@ -58,33 +61,19 @@ export class ProductService {
     );
   }
 
-  // Récupérer un produit par ID
   getProductById(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
-  // Créer un nouveau produit
   createProduct(product: Partial<Product>): Observable<Product> {
     return this.http.post<Product>(this.apiUrl, product);
   }
 
-  // Mettre à jour un produit
   updateProduct(id: string, product: Partial<Product>): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/${id}`, product);
   }
 
-  // Supprimer un produit
   deleteProduct(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
-  }
-
-  // Récupérer toutes les catégories
-  getCategories(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/categories`);
-  }
-
-  // Récupérer les noms des catégories
-  getCategoryNames(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/categories/names`);
   }
 }

@@ -2,31 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface Order {
-  _id: string;
-  user: string;
-  items: Array<{
-    product: string;
-    quantity: number;
-    price: number;
-  }>;
-  total: number;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CheckoutSession {
-  sessionId: string;
-  url: string;
-}
-
-export interface PaymentStatus {
-  success: boolean;
-  orderId?: string;
-  message?: string;
-}
+import {
+  Order,
+  OrderGroup,
+  CheckoutSession,
+  PaymentStatus,
+  UserAddress,
+  UpdateOrderStatusRequest,
+} from '../models/order.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -36,35 +19,32 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  // Récupérer les commandes de l'utilisateur
-  getUserOrders(): Observable<Order[]> {
-    return this.http.get<Order[]>(this.apiUrl);
+  getUserOrders(): Observable<OrderGroup[]> {
+    return this.http.get<OrderGroup[]>(this.apiUrl);
   }
 
-  // Récupérer une commande par ID
+  getStoreOrders(): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.apiUrl}/admin`);
+  }
+
   getOrderById(id: string): Observable<Order> {
     return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }
 
-  // Créer une session de checkout
-  createCheckoutSession(): Observable<CheckoutSession> {
-    return this.http.post<CheckoutSession>(`${this.apiUrl}/checkout`, {});
+  createCheckoutSession(userAddress: UserAddress): Observable<CheckoutSession> {
+    return this.http.post<CheckoutSession>(`${this.apiUrl}/checkout`, {
+      userAddress,
+    });
   }
 
-  // Vérifier le statut d'un paiement
   verifyPayment(sessionId: string): Observable<PaymentStatus> {
     return this.http.get<PaymentStatus>(
       `${this.apiUrl}/verify-payment/${sessionId}`
     );
   }
 
-  // Mettre à jour le statut d'une commande
   updateOrderStatus(id: string, status: string): Observable<Order> {
-    return this.http.put<Order>(`${this.apiUrl}/${id}/status`, { status });
-  }
-
-  // Annuler une commande
-  cancelOrder(id: string): Observable<Order> {
-    return this.http.post<Order>(`${this.apiUrl}/${id}/cancel`, {});
+    const request: UpdateOrderStatusRequest = { status };
+    return this.http.put<Order>(`${this.apiUrl}/${id}/status`, request);
   }
 }

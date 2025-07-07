@@ -28,6 +28,9 @@ export class AppInitializerService {
             this.userService.setUserLastName(user.lastName || '');
             this.userService.setUserID(user._id || '');
             this.userService.setUserRole(tokenData.role);
+            if (tokenData.store) {
+              this.userService.setUserStore(tokenData.store);
+            }
           });
         } else {
           this.userService.setUserEmail('');
@@ -35,6 +38,7 @@ export class AppInitializerService {
           this.userService.setUserLastName('');
           this.userService.setUserID('');
           this.userService.setUserRole('');
+          this.userService.setUserStore('');
           this.tokenService.removeToken();
           this.router.navigate(['/auth/login']);
         }

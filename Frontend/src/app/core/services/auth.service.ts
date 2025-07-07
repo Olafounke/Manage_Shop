@@ -37,6 +37,9 @@ export class AuthService {
         this.userService.setUserFirstName(user.firstName || '');
         this.userService.setUserLastName(user.lastName || '');
         this.userService.setUserID(user._id || '');
+        if (tokenData.store) {
+          this.userService.setUserStore(tokenData.store);
+        }
       });
       return true;
     } catch (error) {

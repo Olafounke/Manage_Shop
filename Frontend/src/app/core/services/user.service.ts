@@ -9,6 +9,7 @@ export class UserService {
   private firstName = signal('');
   private lastName = signal('');
   private _id = signal('');
+  private store = signal('');
 
   getUserEmail(): string {
     return this.email();
@@ -40,6 +41,14 @@ export class UserService {
 
   setUserLastName(lastName: string): void {
     this.lastName.set(lastName);
+  }
+
+  getUserStore(): string {
+    return this.store();
+  }
+
+  setUserStore(store: string): void {
+    this.store.set(store);
   }
 
   getUserID(): string {
