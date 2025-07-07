@@ -130,9 +130,7 @@ export class CartComponent implements OnInit {
 
     this.orderService.createCheckoutSession(userAddress).subscribe({
       next: (checkoutSession) => {
-        console.log('checkoutSession', checkoutSession);
-        console.log('checkoutSession.url', checkoutSession.url);
-        //window.location.href = checkoutSession.url;
+        window.location.href = checkoutSession.url;
       },
       error: (error) => {
         this.error = 'Erreur lors de la création de la session de paiement';
