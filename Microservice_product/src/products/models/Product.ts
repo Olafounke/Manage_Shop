@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   images?: string[];
   categories?: mongoose.Types.ObjectId[];
   owner: mongoose.Types.ObjectId;
+  stores: string[];
   customFields?: Record<string, any>;
 }
 
@@ -18,6 +19,7 @@ const productSchema = new Schema<IProduct>(
     images: [{ type: String }],
     categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
     owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    stores: [{ type: String, maxlength: 8 }],
     customFields: { type: Schema.Types.Mixed },
   },
   { timestamps: true }

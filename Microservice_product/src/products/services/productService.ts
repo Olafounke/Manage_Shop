@@ -26,13 +26,20 @@ export class ProductService {
   }
 
   static async getMyProducts(userId: string) {
+    console.log("[ProductService-MS] Début de getMyProducts");
+    console.log("[ProductService-MS] User ID reçu:", userId);
+
     if (!userId) {
+      console.error("[ProductService-MS] Utilisateur non authentifié");
       throw new Error("Utilisateur non authentifié.");
     }
 
     const query = { owner: new mongoose.Types.ObjectId(userId) };
+    console.log("[ProductService-MS] Query MongoDB:", query);
 
     const products = await Product.find(query).populate("categories", "name slug").sort({ createdAt: -1 });
+    console.log("[ProductService-MS] Produits trouvés:", products);
+    console.log("[ProductService-MS] Nombre de produits:", products.length);
 
     return products;
   }
@@ -46,7 +53,7 @@ export class ProductService {
   }
 
   static async createProduct(productData: any, userId: string) {
-    const { name, price, description, images, categories, customFields } = productData;
+    const { name, price, description, images, categories, customFields, storeId, initialQuantity = 0 } = productData;
 
     if (!userId) {
       throw new Error("Utilisateur non authentifié.");
@@ -68,9 +75,20 @@ export class ProductService {
       categories,
       customFields,
       owner: new mongoose.Types.ObjectId(userId),
+      stores: storeId ? [storeId] : [],
     });
 
-    return await product.save();
+    const savedProduct = await product.save();
+
+    return {
+      product: savedProduct,
+      createInventory: {
+        productId: (savedProduct._id as mongoose.Types.ObjectId).toString(),
+        productName: savedProduct.name,
+        quantity: initialQuantity,
+        storeId: storeId,
+      },
+    };
   }
 
   static async updateProduct(id: string, productData: any, userId: string, userRole?: string) {
@@ -89,11 +107,15 @@ export class ProductService {
     }
 
     delete productData.owner;
+    delete productData.stores;
+    delete productData.totalInventory;
+    delete productData.inStock;
+
     Object.assign(product, productData);
     return await product.save();
   }
 
-  static async deleteProduct(id: string, userId: string, userRole?: string) {
+  static async deleteProduct(id: string, userId: string, userRole?: string, storeId?: string) {
     if (!userId) {
       throw new Error("Utilisateur non authentifié.");
     }
@@ -104,12 +126,119 @@ export class ProductService {
       throw new Error("Produit non trouvé.");
     }
 
+    // Si l'utilisateur est un super admin, on supprime le produit
+    if (userRole === "SUPER_ADMIN") {
+      await product.deleteOne();
+      return {
+        action: "delete_complete",
+        message: "Produit supprimé complètement.",
+        storeToClean: product.stores,
+      };
+    }
+
+    // Si l'utilisateur n'est pas propriétaire du produit
     if (userRole !== "SUPER_ADMIN" && product.owner.toString() !== userId) {
+      if (storeId && product.stores.includes(storeId)) {
+        const result = await this.removeStoreFromProduct(id, storeId);
+        if (result.deleted) {
+          return {
+            action: "delete_complete",
+            message: "Produit supprimé car plus aucun store ni owner.",
+          };
+        } else {
+          return {
+            action: "remove_store",
+            message: "Produit retiré de votre inventaire.",
+            storeToClean: storeId,
+          };
+        }
+      }
       throw new Error("Non autorisé à supprimer ce produit.");
     }
 
-    await product.deleteOne();
-    return { message: "Produit supprimé." };
+    const storeCount = product.stores.length;
+
+    // Si l'utilisateur est propriétaire du produit
+    if (storeCount === 1) {
+      await product.deleteOne();
+      return {
+        action: "delete_complete",
+        message: "Produit supprimé complètement.",
+        storeToClean: product.stores[0],
+      };
+    } else if (storeCount > 1) {
+      const updatedStores = product.stores.filter((store) => store !== storeId);
+
+      const updateData: any = { stores: updatedStores };
+
+      if (product.owner.toString() === userId) {
+        updateData.$unset = { owner: "" };
+      }
+
+      await Product.findByIdAndUpdate(id, updateData);
+
+      return {
+        action: "remove_store",
+        message: "Produit retiré de votre inventaire.",
+        storeToClean: storeId,
+      };
+    } else {
+      await product.deleteOne();
+      return {
+        action: "delete_complete",
+        message: "Produit supprimé (aucun store actif).",
+      };
+    }
+  }
+
+  static async addStoreToProduct(productId: string, storeId: string) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error("Produit non trouvé.");
+    }
+
+    if (!product.stores.includes(storeId)) {
+      product.stores.push(storeId);
+      await product.save();
+    }
+
+    return product;
+  }
+
+  static async removeStoreFromProduct(productId: string, storeId: string) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error("Produit non trouvé.");
+    }
+
+    product.stores = product.stores.filter((store) => store !== storeId);
+
+    if (product.stores.length === 0 && !product.owner) {
+      await product.deleteOne();
+      return { deleted: true };
+    }
+
+    await product.save();
+    return { deleted: false, product };
+  }
+
+  static async removeStoreFromAllProducts(storeId: string) {
+    try {
+      const updateResult = await Product.updateMany({ stores: storeId }, { $pull: { stores: storeId } });
+
+      const deleteResult = await Product.deleteMany({
+        stores: { $size: 0 },
+        owner: { $exists: false },
+      });
+
+      return {
+        modifiedCount: updateResult.modifiedCount,
+        deletedCount: deleteResult.deletedCount,
+      };
+    } catch (error) {
+      console.error("Erreur lors de la suppression du store des produits:", error);
+      throw error;
+    }
   }
 
   private static async buildQuery(queryParams: any) {

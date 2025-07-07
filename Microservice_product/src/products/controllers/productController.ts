@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ProductService } from "../services/productService";
 
 interface AuthRequest extends Request {
-  user?: { userId: string; role: string };
+  user?: { userId: string; role: string; store: string };
 }
 
 export class ProductController {
@@ -18,11 +18,23 @@ export class ProductController {
 
   public async getMyProducts(req: AuthRequest, res: Response): Promise<void> {
     try {
+      console.log("[ProductController-MS] Début de getMyProducts");
+      console.log("[ProductController-MS] User info:", req.user);
+
       const userId = req.user?.userId;
+      console.log("[ProductController-MS] User ID extrait:", userId);
+
       const result = await ProductService.getMyProducts(userId!);
+      console.log("[ProductController-MS] Résultat du service:", result);
+      console.log(
+        "[ProductController-MS] Nombre de produits retournés:",
+        Array.isArray(result) ? result.length : "Non array"
+      );
+
       res.json(result);
     } catch (err: any) {
-      console.error("Erreur getMyProducts:", err);
+      console.error("[ProductController-MS] Erreur getMyProducts:", err);
+      console.error("[ProductController-MS] Stack trace:", err.stack);
       if (err.message === "Utilisateur non authentifié.") {
         res.status(401).json({ error: err.message });
       } else {
@@ -75,7 +87,8 @@ export class ProductController {
     try {
       const userId = req.user?.userId;
       const userRole = req.user?.role;
-      const result = await ProductService.deleteProduct(req.params.id, userId!, userRole);
+      const storeId = req.user?.store;
+      const result = await ProductService.deleteProduct(req.params.id, userId!, userRole, storeId);
       res.json(result);
     } catch (err: any) {
       if (err.message === "Produit non trouvé.") {
@@ -85,6 +98,84 @@ export class ProductController {
       } else {
         res.status(400).json({ error: "Erreur lors de la suppression." });
       }
+    }
+  }
+
+  public async addStoreToProduct(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { storeId } = req.body;
+      const productId = req.params.id;
+
+      if (!storeId) {
+        res.status(400).json({ error: "StoreId requis." });
+        return;
+      }
+
+      const result = await ProductService.addStoreToProduct(productId, storeId);
+      res.json({
+        message: "Store ajouté au produit avec succès.",
+        product: result,
+      });
+    } catch (err: any) {
+      if (err.message === "Produit non trouvé.") {
+        res.status(404).json({ error: err.message });
+      } else {
+        res.status(400).json({ error: err.message });
+      }
+    }
+  }
+
+  public async removeStoreFromProduct(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const storeId = req.user?.store;
+      const productId = req.params.id;
+
+      if (!storeId) {
+        res.status(400).json({ error: "StoreId requis." });
+        return;
+      }
+
+      const result = await ProductService.removeStoreFromProduct(productId, storeId);
+
+      if (result.deleted) {
+        res.json({
+          message: "Produit supprimé car plus aucun store ni owner.",
+          deleted: true,
+        });
+      } else {
+        res.json({
+          message: "Store retiré du produit avec succès.",
+          product: result.product,
+        });
+      }
+    } catch (err: any) {
+      if (err.message === "Produit non trouvé.") {
+        res.status(404).json({ error: err.message });
+      } else {
+        res.status(400).json({ error: err.message });
+      }
+    }
+  }
+
+  public async removeStoreFromAllProducts(req: Request, res: Response): Promise<void> {
+    try {
+      const storeId = req.params.storeId;
+
+      if (!storeId) {
+        res.status(400).json({ error: "StoreId requis dans les paramètres." });
+        return;
+      }
+
+      const result = await ProductService.removeStoreFromAllProducts(storeId);
+
+      res.json({
+        message: `Store ${storeId} supprimé de tous les produits avec succès.`,
+        modifiedCount: result.modifiedCount,
+        deletedCount: result.deletedCount,
+      });
+    } catch (err: any) {
+      console.error("Erreur removeStoreFromAllProducts:", err);
+      res.status(500).json({ error: "Erreur lors de la suppression du store des produits." });
     }
   }
 }
