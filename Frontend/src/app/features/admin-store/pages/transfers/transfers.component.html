@@ -1,1 +1,147 @@
-<p>transfers works!</p>
+<div class="transfers-management-header">
+  <h1>Gestion des transferts</h1>
+  <app-button
+    [config]="{
+      style: 'add',
+      type: 'button',
+      size: 'medium',
+      display: 'icon+text',
+      text: 'Faire une demande de transfert',
+      icon: 'swap_horiz'
+    }"
+    [responsive]="true"
+    (onClick)="toggleCreateTransfertModal()"
+  />
+</div>
+
+<!-- Transferts sortants -->
+<div class="transfers-section" *ngIf="outgoingTransferts.length > 0">
+  <h2>Mes demandes de transfert</h2>
+  <app-table [columns]="outgoingColumns" [data]="outgoingTransferts">
+  </app-table>
+</div>
+
+<!-- Transferts entrants -->
+<div class="transfers-section" *ngIf="incomingTransferts.length > 0">
+  <h2>Demandes reçues</h2>
+  <app-table [columns]="incomingColumns" [data]="incomingTransferts">
+    <ng-template #incomingActionsTemplate let-item>
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'check'
+        }"
+        (onClick)="prepareAction('accept', item._id)"
+      />
+      <app-button
+        [config]="{
+          style: 'delete',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'close'
+        }"
+        (onClick)="prepareAction('reject', item._id)"
+      />
+    </ng-template>
+  </app-table>
+</div>
+
+<!-- Historique -->
+<div class="transfers-section" *ngIf="historyTransferts.length > 0">
+  <h2>Historique des transferts</h2>
+  <app-table [columns]="historyColumns" [data]="historyTransferts"> </app-table>
+</div>
+
+<!-- Modal de création de transfert -->
+<app-modal
+  [isOpen]="showCreateTransfertModal"
+  [title]="'Faire une demande de transfert'"
+  (closeModal)="toggleCreateTransfertModal()"
+>
+  <form (ngSubmit)="createTransfert()">
+    <div class="form-group">
+      <label for="productId">Produit à transférer</label>
+      <select
+        id="productId"
+        [(ngModel)]="newTransfert.productId"
+        name="productId"
+        (change)="onProductChange()"
+        required
+      >
+        <option value="">Sélectionner un produit</option>
+        <option *ngFor="let stock of myStocks" [value]="stock.productId">
+          {{ stock.productName }} (Stock: {{ stock.quantity }})
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="quantity">Quantité à transférer</label>
+      <input
+        type="number"
+        id="quantity"
+        [(ngModel)]="newTransfert.quantity"
+        name="quantity"
+        min="1"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="toStoreId">Magasin destinataire</label>
+      <select
+        id="toStoreId"
+        [(ngModel)]="newTransfert.toStoreId"
+        name="toStoreId"
+        (change)="onStoreChange()"
+        required
+      >
+        <option value="">Sélectionner un magasin</option>
+        <option *ngFor="let store of availableStores" [value]="store.storeId">
+          {{ store.storeName }}
+        </option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'submit',
+          size: 'medium',
+          display: 'text',
+          text: 'Créer la demande'
+        }"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleCreateTransfertModal()"
+      />
+    </div>
+  </form>
+</app-modal>
+
+<!-- Modal de confirmation -->
+<app-generic-confirm-delete-modal
+  [title]="
+    pendingAction?.action === 'accept'
+      ? 'Confirmation d\'acceptation'
+      : 'Confirmation de refus'
+  "
+  [itemType]="
+    pendingAction?.action === 'accept'
+      ? 'accepter ce transfert'
+      : 'refuser ce transfert'
+  "
+  (confirmDelete)="onConfirmAction($event)"
+/>

@@ -1,1 +1,88 @@
-<p>products works!</p>
+<div class="products-management-header">
+  <h1>Gestion de mes produits</h1>
+  <app-button
+    [config]="{
+      style: 'add',
+      type: 'button',
+      size: 'medium',
+      display: 'icon+text',
+      text: 'Ajouter un produit',
+      icon: 'add'
+    }"
+    [responsive]="true"
+    (onClick)="toggleAddProduct()"
+  />
+</div>
+
+<app-table
+  [columns]="tableColumns"
+  [data]="products"
+  [editingItem]="editingProduct"
+  (editChange)="onEditChange($event)"
+>
+  <ng-template #actionsTemplate let-item>
+    <ng-container *ngIf="!editingProduct || editingProduct._id !== item._id">
+      <app-button
+        [config]="{
+          style: 'edit',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'edit'
+        }"
+        (onClick)="toggleEditProduct(item)"
+      />
+      <app-button
+        [config]="{
+          style: 'delete',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'delete'
+        }"
+        (onClick)="toggleConfirmDelete(item._id)"
+      />
+    </ng-container>
+
+    <ng-container
+      *ngIf="!isResponsive && editingProduct && editingProduct._id === item._id"
+    >
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Sauvegarder'
+        }"
+        (onClick)="updateProduct()"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleEditProduct()"
+      />
+    </ng-container>
+  </ng-template>
+</app-table>
+
+<app-add-product-modal
+  [categories]="categories"
+  (refreshProducts)="getMyProducts()"
+/>
+
+<app-edit-product-modal
+  [categories]="categories"
+  (updateProduct)="updateProduct()"
+/>
+
+<app-generic-confirm-delete-modal
+  title="Confirmation de suppression"
+  itemType="ce produit"
+  (confirmDelete)="onConfirmDelete($event)"
+/>

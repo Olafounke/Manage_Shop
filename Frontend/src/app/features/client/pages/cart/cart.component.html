@@ -1,109 +1,304 @@
-<main class="cart-container">
+<div class="cart-container">
+  <!-- Header du panier -->
   <div class="cart-header">
     <h1>Mon Panier</h1>
-    <p *ngIf="cart && cart.items && cart.items.length > 0">
-      Total: {{ getTotalItems() }} article(s)
-    </p>
+    <div class="cart-summary" *ngIf="!isCartEmpty()">
+      <span class="items-count">{{ getTotalItems() }} article(s)</span>
+    </div>
   </div>
 
-  <!-- Loading state -->
-  <div *ngIf="loading" class="loading">
+  <!-- État de chargement -->
+  <div *ngIf="loading" class="loading-state">
     <p>Chargement du panier...</p>
   </div>
 
-  <!-- Error state -->
-  <div *ngIf="error" class="error">
+  <!-- État d'erreur -->
+  <div *ngIf="error && !loading" class="error-state">
     <p>{{ error }}</p>
-    <app-button [config]="getRetryButtonConfig()" (onClick)="loadCart()">
-    </app-button>
+    <app-button
+      [config]="{
+        style: 'default',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Réessayer'
+      }"
+      (onClick)="loadCart()"
+    />
   </div>
 
-  <!-- Empty cart -->
-  <div
-    *ngIf="
-      !loading && !error && (!cart || !cart.items || cart.items.length === 0)
-    "
-    class="empty-cart"
-  >
-    <h2>Votre panier est vide</h2>
-    <p>Ajoutez des produits pour commencer vos achats</p>
-    <app-button [config]="getContinueShoppingButtonConfig()" routerLink="/">
-    </app-button>
+  <!-- Panier vide -->
+  <div *ngIf="isCartEmpty() && !loading && !error" class="empty-cart">
+    <div class="empty-cart-content">
+      <h2>Votre panier est vide</h2>
+      <p>Découvrez nos produits et ajoutez-les à votre panier</p>
+      <app-button
+        [config]="{
+          style: 'default',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Continuer les achats'
+        }"
+        [routerLink]="['/']"
+      />
+    </div>
   </div>
 
-  <!-- Cart items -->
-  <div
-    *ngIf="!loading && !error && cart && cart.items && cart.items.length > 0"
-    class="cart-content"
-  >
+  <!-- Contenu du panier -->
+  <div *ngIf="!isCartEmpty() && !loading" class="cart-content">
+    <!-- Articles du panier -->
     <div class="cart-items">
-      <div *ngFor="let item of cart.items" class="cart-item">
-        <div class="item-info">
-          <h3>Produit ID: {{ item.product }}</h3>
-          <p class="item-price">
-            {{ item.price | currency : "EUR" : "symbol" : "1.2-2" }}
-          </p>
-        </div>
+      <div class="cart-items-header">
+        <h2>Articles dans votre panier</h2>
+        <app-button
+          [config]="{
+            style: 'delete',
+            type: 'button',
+            size: 'small',
+            display: 'text',
+            text: 'Vider le panier'
+          }"
+          (onClick)="clearCart()"
+        />
+      </div>
 
-        <div class="item-actions">
-          <div class="quantity-controls">
+      <div class="items-list">
+        <div *ngFor="let item of cart?.items" class="cart-item">
+          <div class="item-info">
+            <h3 class="item-id">Produit ID: {{ item.product }}</h3>
+            <p class="item-price">{{ formatPrice(item.price) }}</p>
+          </div>
+
+          <div class="item-quantity">
             <button
-              (click)="updateQuantity(item.product, item.quantity - 1)"
               class="quantity-btn"
-              [disabled]="loading"
+              (click)="updateQuantity(item.product, item.quantity - 1)"
+              [disabled]="item.quantity <= 1"
             >
               -
             </button>
-            <span class="quantity">{{ item.quantity }}</span>
+            <span class="quantity-value">{{ item.quantity }}</span>
             <button
-              (click)="updateQuantity(item.product, item.quantity + 1)"
               class="quantity-btn"
-              [disabled]="loading"
+              (click)="updateQuantity(item.product, item.quantity + 1)"
             >
               +
             </button>
           </div>
 
-          <button
-            (click)="removeItem(item.product)"
-            class="remove-btn"
-            [disabled]="loading"
-          >
-            Supprimer
-          </button>
-        </div>
-
-        <div class="item-total">
-          <p>
-            {{
-              item.price * item.quantity | currency : "EUR" : "symbol" : "1.2-2"
-            }}
-          </p>
+          <div class="item-total">
+            <p class="total-price">
+              {{ formatPrice(item.price * item.quantity) }}
+            </p>
+            <app-button
+              [config]="{
+                style: 'delete',
+                type: 'button',
+                size: 'small',
+                display: 'icon',
+                icon: 'delete'
+              }"
+              (onClick)="removeItem(item.product)"
+            />
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Cart summary -->
-    <div class="cart-summary">
-      <div class="summary-row">
-        <span>Sous-total:</span>
-        <span>{{ cart.total | currency : "EUR" : "symbol" : "1.2-2" }}</span>
-      </div>
+    <!-- Résumé de commande -->
+    <div class="order-summary">
+      <div class="summary-card">
+        <h2>Résumé de la commande</h2>
 
-      <div class="summary-actions">
-        <app-button
-          [config]="getClearCartButtonConfig()"
-          (onClick)="clearCart()"
-        >
-        </app-button>
+        <div class="summary-line">
+          <span>Sous-total:</span>
+          <span>{{ formatPrice(cart?.total || 0) }}</span>
+        </div>
 
-        <app-button
-          [config]="getCheckoutButtonConfig()"
-          (onClick)="proceedToCheckout()"
-        >
-        </app-button>
-        <app-checkout></app-checkout>
+        <div class="summary-line total-line">
+          <span><strong>Total:</strong></span>
+          <span
+            ><strong>{{ formatPrice(cart?.total || 0) }}</strong></span
+          >
+        </div>
+
+        <!-- Actions du panier -->
+        <div class="cart-actions">
+          <app-button
+            [config]="{
+              style: 'save',
+              type: 'button',
+              size: 'big',
+              display: 'text',
+              text: 'Procéder au paiement'
+            }"
+            (onClick)="proceedToCheckout()"
+          />
+
+          <app-button
+            [config]="{
+              style: 'default',
+              type: 'button',
+              size: 'medium',
+              display: 'text',
+              text: 'Continuer les achats'
+            }"
+            [routerLink]="['/']"
+          />
+        </div>
       </div>
     </div>
   </div>
-</main>
+</div>
+
+<!-- Modal d'adresse de livraison -->
+<app-modal
+  [isOpen]="showAddressModal"
+  [title]="'Adresse de livraison'"
+  (closeModal)="cancelAddressModal()"
+>
+  <div class="address-modal-content">
+    <div class="order-summary-modal">
+      <h3>Récapitulatif de votre commande</h3>
+      <div class="summary-items">
+        <div *ngFor="let item of cart?.items" class="summary-item">
+          <span>{{ item.quantity }}x Produit ID: {{ item.product }}</span>
+          <span>{{ formatPrice(item.price * item.quantity) }}</span>
+        </div>
+      </div>
+      <div class="summary-total">
+        <span
+          ><strong>Total: {{ formatPrice(cart?.total || 0) }}</strong></span
+        >
+      </div>
+    </div>
+
+    <form
+      [formGroup]="addressForm"
+      (ngSubmit)="proceedToCheckout()"
+      class="address-form-modal"
+    >
+      <div class="form-group">
+        <label for="street-modal">Adresse*</label>
+        <input
+          type="text"
+          id="street-modal"
+          formControlName="street"
+          placeholder="123 rue de la République"
+          [class.error]="
+            addressForm.get('street')?.invalid &&
+            addressForm.get('street')?.touched
+          "
+        />
+        <div
+          *ngIf="
+            addressForm.get('street')?.invalid &&
+            addressForm.get('street')?.touched
+          "
+          class="error-message"
+        >
+          Adresse requise (minimum 5 caractères)
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city-modal">Ville*</label>
+          <input
+            type="text"
+            id="city-modal"
+            formControlName="city"
+            placeholder="Paris"
+            [class.error]="
+              addressForm.get('city')?.invalid &&
+              addressForm.get('city')?.touched
+            "
+          />
+          <div
+            *ngIf="
+              addressForm.get('city')?.invalid &&
+              addressForm.get('city')?.touched
+            "
+            class="error-message"
+          >
+            Ville requise
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="postalCode-modal">Code postal*</label>
+          <input
+            type="text"
+            id="postalCode-modal"
+            formControlName="postalCode"
+            placeholder="75000"
+            [class.error]="
+              addressForm.get('postalCode')?.invalid &&
+              addressForm.get('postalCode')?.touched
+            "
+          />
+          <div
+            *ngIf="
+              addressForm.get('postalCode')?.invalid &&
+              addressForm.get('postalCode')?.touched
+            "
+            class="error-message"
+          >
+            Code postal requis (5 chiffres)
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="country-modal">Pays*</label>
+        <input
+          type="text"
+          id="country-modal"
+          formControlName="country"
+          placeholder="France"
+          [class.error]="
+            addressForm.get('country')?.invalid &&
+            addressForm.get('country')?.touched
+          "
+        />
+        <div
+          *ngIf="
+            addressForm.get('country')?.invalid &&
+            addressForm.get('country')?.touched
+          "
+          class="error-message"
+        >
+          Pays requis
+        </div>
+      </div>
+
+      <div *ngIf="error" class="error-state-modal">
+        <p>{{ error }}</p>
+      </div>
+
+      <div class="modal-actions">
+        <app-button
+          [config]="{
+            style: 'save',
+            type: 'submit',
+            size: 'medium',
+            display: 'text',
+            text: checkoutLoading ? 'Traitement...' : 'Confirmer le paiement',
+            disabled: checkoutLoading
+          }"
+        />
+        <app-button
+          [config]="{
+            style: 'cancel',
+            type: 'button',
+            size: 'medium',
+            display: 'text',
+            text: 'Annuler'
+          }"
+          (onClick)="cancelAddressModal()"
+        />
+      </div>
+    </form>
+  </div>
+</app-modal>

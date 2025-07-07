@@ -1,1 +1,65 @@
-<p>stock works!</p>
+<div class="stock-management-header">
+  <h1>Gestion du stock</h1>
+</div>
+
+<app-table
+  [columns]="tableColumns"
+  [data]="stocks"
+  [editingItem]="editingStock"
+  (editChange)="onEditChange($event)"
+>
+  <ng-template #actionsTemplate let-item>
+    <ng-container *ngIf="!editingStock || editingStock.id !== item.id">
+      <app-button
+        [config]="{
+          style: 'edit',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'edit'
+        }"
+        (onClick)="toggleEditStock(item)"
+      />
+      <app-button
+        [config]="{
+          style: 'delete',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'delete'
+        }"
+        (onClick)="toggleConfirmDelete(item.productId)"
+      />
+    </ng-container>
+
+    <ng-container
+      *ngIf="!isResponsive && editingStock && editingStock.id === item.id"
+    >
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Sauvegarder'
+        }"
+        (onClick)="updateStock()"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleEditStock()"
+      />
+    </ng-container>
+  </ng-template>
+</app-table>
+
+<app-generic-confirm-delete-modal
+  (confirmDelete)="onConfirmDelete($event)"
+  itemType="ce stock"
+/>

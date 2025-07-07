@@ -1,1 +1,86 @@
-<p>stores-management works!</p>
+<div class="stores-management-header">
+  <h1>Gestion des magasins</h1>
+  <app-button
+    [config]="{
+      style: 'add',
+      type: 'button',
+      size: 'medium',
+      display: 'icon+text',
+      text: 'Ajouter un magasin',
+      icon: 'add_business'
+    }"
+    [responsive]="true"
+    (onClick)="toggleAddStore()"
+  />
+</div>
+
+<app-table
+  [columns]="tableColumns"
+  [data]="stores"
+  [editingItem]="editingStore"
+  (editChange)="onEditChange($event)"
+>
+  <ng-template #actionsTemplate let-item>
+    <ng-container
+      *ngIf="!editingStore || editingStore.storeId !== item.storeId"
+    >
+      <app-button
+        [config]="{
+          style: 'edit',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'edit'
+        }"
+        (onClick)="toggleEditStore(item)"
+      />
+      <app-button
+        [config]="{
+          style: 'delete',
+          type: 'button',
+          size: 'small',
+          display: 'icon',
+          icon: 'delete'
+        }"
+        (onClick)="toggleConfirmDelete(item.storeId)"
+      />
+    </ng-container>
+
+    <ng-container
+      *ngIf="
+        !isResponsive && editingStore && editingStore.storeId === item.storeId
+      "
+    >
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Sauvegarder'
+        }"
+        (onClick)="updateStore()"
+      />
+      <app-button
+        [config]="{
+          style: 'cancel',
+          type: 'button',
+          size: 'small',
+          display: 'text',
+          text: 'Annuler'
+        }"
+        (onClick)="toggleEditStore()"
+      />
+    </ng-container>
+  </ng-template>
+</app-table>
+
+<app-add-store-modal [users]="users" (refreshStores)="getAllStores()" />
+
+<app-edit-store-modal [users]="users" (updateStore)="updateStore($event)" />
+
+<app-generic-confirm-delete-modal
+  title="Confirmation de suppression"
+  itemType="ce magasin"
+  (confirmDelete)="onConfirmDelete($event)"
+/>

@@ -1,10 +1,276 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Store } from '../../../../core/models/store.interface';
+import { User } from '../../../../core/models/user.interface';
+
+interface StoreDisplay {
+  id: number;
+  storeId: string;
+  storeName: string;
+  storeNameSlug: string;
+  storeAddress: string;
+  longitude?: string;
+  latitude?: string;
+  userId?: string;
+  userEmail: string;
+  createdAt: string;
+  updatedAt: Date;
+}
+import { StoreService } from '../../../../core/services/store.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { TableColumn } from '../../../../core/models/table.interface';
+import { AddStoreModalComponent } from '../../components/add-store-modal/add-store-modal.component';
+import { EditStoreModalComponent } from '../../components/edit-store-modal/edit-store-modal.component';
+import { GenericConfirmDeleteModalComponent } from '../../../../shared/components/generic-confirm-delete-modal/generic-confirm-delete-modal.component';
 
 @Component({
   selector: 'app-stores-management',
   standalone: true,
-  imports: [],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableComponent,
+    ButtonComponent,
+    AddStoreModalComponent,
+    EditStoreModalComponent,
+    GenericConfirmDeleteModalComponent,
+  ],
   templateUrl: './stores-management.component.html',
-  styleUrl: './stores-management.component.scss',
+  styleUrls: ['./stores-management.component.scss'],
 })
-export class StoresManagementComponent {}
+export class StoresManagementComponent implements OnInit {
+  @ViewChild(AddStoreModalComponent) addStoreModal!: AddStoreModalComponent;
+  @ViewChild(EditStoreModalComponent) editStoreModal!: EditStoreModalComponent;
+  @ViewChild(GenericConfirmDeleteModalComponent)
+  confirmDeleteModal!: GenericConfirmDeleteModalComponent;
+
+  stores: StoreDisplay[] = [];
+  users: User[] = [];
+  availableEmails: string[] = [];
+  isResponsive = window.innerWidth <= 1024;
+
+  tableColumns: TableColumn[] = [
+    {
+      key: 'storeName',
+      header: 'Nom du magasin',
+      type: 'text',
+      editable: true,
+    },
+    { key: 'storeAddress', header: 'Adresse', type: 'text', editable: true },
+    { key: 'storeId', header: 'ID du magasin', type: 'text', editable: false },
+    {
+      key: 'userEmail',
+      header: 'Email utilisateur',
+      type: 'select',
+      editable: true,
+      options: this.availableEmails,
+    },
+    {
+      key: 'createdAt',
+      header: 'Date de création',
+      type: 'text',
+      editable: false,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      type: 'actions',
+      template: 'actionsTemplate',
+    },
+  ];
+
+  constructor(
+    private storeService: StoreService,
+    private authService: AuthService
+  ) {
+    window.addEventListener('resize', () => {
+      this.isResponsive = window.innerWidth <= 1024;
+    });
+  }
+
+  ngOnInit(): void {
+    this.getAllUsers();
+  }
+
+  getAllUsers(): void {
+    this.authService.getAllUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.availableEmails = ['', ...users.map((user) => user.email)];
+
+        const userEmailColumn = this.tableColumns.find(
+          (col) => col.key === 'userEmail'
+        );
+        if (userEmailColumn) {
+          userEmailColumn.options = this.availableEmails;
+        }
+
+        this.getAllStores();
+      },
+      error: (err) =>
+        console.error('Erreur lors de la récupération des utilisateurs:', err),
+    });
+  }
+
+  getAllStores(): void {
+    this.storeService.getAllStores().subscribe({
+      next: (stores) => {
+        this.stores = stores.map((store) => ({
+          ...store,
+          userEmail: this.getUserEmail(store.userId),
+          createdAt: this.formatDate(store.createdAt),
+          storeAddress: store.storeAddress,
+        }));
+      },
+      error: (err) =>
+        console.error('Erreur lors de la récupération des magasins:', err),
+    });
+  }
+
+  getUserEmail(userId: string | undefined): string {
+    if (!userId) return '';
+    const user = this.users.find((u) => u._id === userId);
+    return user ? user.email : '';
+  }
+
+  formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  convertStoreToDisplay(store: Store): StoreDisplay {
+    return {
+      ...store,
+      userEmail: this.getUserEmail(store.userId),
+      createdAt: this.formatDate(store.createdAt),
+      storeAddress: store.storeAddress,
+    };
+  }
+
+  hasStoreDisplayProperties(
+    store: Store | StoreDisplay
+  ): store is StoreDisplay {
+    return 'storeAddress' in store && 'userEmail' in store;
+  }
+
+  // Différents éléments pour l'update d'un magasin
+  editingStore: StoreDisplay | null = null;
+
+  updateStore(store?: Store | StoreDisplay): void {
+    let storeToUpdate: StoreDisplay | null = null;
+
+    if (store) {
+      // Si c'est un Store, le convertir en StoreDisplay
+      storeToUpdate = this.hasStoreDisplayProperties(store)
+        ? (store as StoreDisplay)
+        : this.convertStoreToDisplay(store as Store);
+    } else {
+      storeToUpdate =
+        this.editingStore ||
+        (this.editStoreModal.editingModalStore
+          ? this.convertStoreToDisplay(this.editStoreModal.editingModalStore)
+          : null);
+    }
+
+    if (storeToUpdate && storeToUpdate.storeId) {
+      const updateData = {
+        storeName: storeToUpdate.storeName,
+        storeAddress: storeToUpdate.storeAddress,
+        userId: storeToUpdate.userId,
+      };
+
+      this.storeService
+        .updateStore(storeToUpdate.storeId, updateData)
+        .subscribe({
+          next: (updatedStore) => {
+            const index = this.stores.findIndex(
+              (s) => s.storeId === storeToUpdate.storeId
+            );
+            if (index !== -1) {
+              this.stores[index] = this.convertStoreToDisplay(updatedStore);
+            }
+            this.editingStore = null;
+            this.editStoreModal.editingModalStore = null;
+            this.editStoreModal.showEditModal = false;
+          },
+          error: (err) =>
+            console.error('Erreur lors de la mise à jour du magasin:', err),
+        });
+    }
+  }
+
+  onEditChange(event: { item: StoreDisplay; key: string; value: any }): void {
+    if (this.editingStore) {
+      if (event.key === 'userEmail') {
+        // Si l'email change, mettre à jour aussi l'userId
+        const selectedUser = this.users.find(
+          (user) => user.email === event.value
+        );
+        this.editingStore = {
+          ...this.editingStore,
+          [event.key]: event.value,
+          userId: selectedUser ? selectedUser._id : undefined,
+        };
+      } else {
+        this.editingStore = {
+          ...this.editingStore,
+          [event.key]: event.value,
+        };
+      }
+    }
+  }
+
+  toggleEditStore(store?: StoreDisplay): void {
+    if (this.isResponsive && !this.editingStore) {
+      const storeForModal: Store = {
+        id: store?.id || 0,
+        storeId: store?.storeId || '',
+        storeName: store?.storeName || '',
+        storeNameSlug: store?.storeNameSlug || '',
+        storeAddress: store?.storeAddress || '',
+        longitude: store?.longitude,
+        latitude: store?.latitude,
+        userId: store?.userId,
+        createdAt: new Date(store?.createdAt || ''),
+        updatedAt: store?.updatedAt || new Date(),
+      };
+      this.editStoreModal.toggleEditStore(storeForModal);
+    } else {
+      if (store) {
+        this.editingStore = { ...store };
+      } else {
+        this.editingStore = null;
+        this.editStoreModal.showEditModal = false;
+        this.editStoreModal.editingModalStore = null;
+      }
+    }
+  }
+
+  toggleAddStore(): void {
+    this.addStoreModal.toggleAddStore();
+  }
+
+  toggleConfirmDelete(storeId: string): void {
+    this.confirmDeleteModal.toggleConfirmDelete(storeId);
+  }
+
+  onConfirmDelete(storeId: string): void {
+    // Supprimer le magasin via l'API
+    this.storeService.deleteStore(storeId).subscribe({
+      next: () => {
+        // Mettre à jour la liste locale après suppression
+        this.stores = this.stores.filter((s) => s.storeId !== storeId);
+      },
+      error: (err) =>
+        console.error('Erreur lors de la suppression du magasin:', err),
+    });
+  }
+}

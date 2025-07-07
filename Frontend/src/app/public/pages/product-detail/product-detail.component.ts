@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '../../../core/services/product.service';
+import { CartService } from '../../../core/services/cart.service';
 import { Product } from '../../../core/models/product.interface';
+import { AddToCartRequest } from '../../../core/models/cart.interface';
 
 @Component({
   selector: 'app-product-detail',
@@ -21,7 +23,8 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private productService: ProductService
+    private productService: ProductService,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -73,15 +76,26 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
-    if (this.product) {
-      // TODO: Implémenter l'ajout au panier
-      console.log(
-        'Ajouter au panier:',
-        this.product,
-        'Quantité:',
-        this.quantity
-      );
+    if (!this.product) {
+      return;
     }
+
+    const addToCartRequest: AddToCartRequest = {
+      productId: this.product._id,
+      quantity: this.quantity,
+      price: this.product.price,
+    };
+
+    this.cartService.addToCart(addToCartRequest).subscribe({
+      next: (cart) => {
+        console.log('Produit ajouté au panier avec succès:', cart);
+        // TODO: Afficher un message de succès ou rediriger vers le panier
+      },
+      error: (error) => {
+        console.error("Erreur lors de l'ajout au panier:", error);
+        // TODO: Afficher un message d'erreur à l'utilisateur
+      },
+    });
   }
 
   formatPrice(price: number): string {

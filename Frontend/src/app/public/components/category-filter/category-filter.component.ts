@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService } from '../../../core/services/product.service';
+import { CategoryService } from '../../../core/services/category.service';
 
 @Component({
   selector: 'app-category-filter',
@@ -17,7 +17,7 @@ export class CategoryFilterComponent implements OnInit {
   categories: string[] = [];
   loading: boolean = false;
 
-  constructor(private productService: ProductService) {}
+  constructor(private categoryService: CategoryService) {}
 
   ngOnInit(): void {
     this.loadCategories();
@@ -25,12 +25,12 @@ export class CategoryFilterComponent implements OnInit {
 
   loadCategories(): void {
     this.loading = true;
-    this.productService.getCategoryNames().subscribe({
-      next: (categories) => {
+    this.categoryService.getCategoryNames().subscribe({
+      next: (categories: string[]) => {
         this.categories = categories;
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Erreur lors du chargement des catégories:', error);
         this.loading = false;
       },

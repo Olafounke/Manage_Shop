@@ -2,19 +2,27 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import {
-  CartService,
-  Cart,
-  CartItem,
-} from '../../../../core/services/cart.service';
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { CartService } from '../../../../core/services/cart.service';
 import { OrderService } from '../../../../core/services/order.service';
+import { Cart, UserAddress } from '../../../../core/models';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { ButtonConfig } from '../../../../core/models/button.interface';
-import { CheckoutComponent } from '../../components/checkout/checkout.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonComponent, CheckoutComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ButtonComponent,
+    ModalComponent,
+    ReactiveFormsModule,
+  ],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.scss',
 })
@@ -22,11 +30,22 @@ export class CartComponent implements OnInit {
   cart: Cart | null = null;
   loading = false;
   error: string | null = null;
+  addressForm: FormGroup;
+  showAddressModal = false;
+  checkoutLoading = false;
 
   constructor(
     private cartService: CartService,
-    private orderService: OrderService
-  ) {}
+    private orderService: OrderService,
+    private fb: FormBuilder
+  ) {
+    this.addressForm = this.fb.group({
+      street: ['', [Validators.required, Validators.minLength(5)]],
+      city: ['', [Validators.required, Validators.minLength(2)]],
+      postalCode: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
+      country: ['France', [Validators.required, Validators.minLength(2)]],
+    });
+  }
 
   ngOnInit(): void {
     this.loadCart();
@@ -93,20 +112,45 @@ export class CartComponent implements OnInit {
   }
 
   proceedToCheckout(): void {
-    this.loading = true;
+    if (!this.showAddressModal) {
+      this.showAddressModal = true;
+      return;
+    }
+
+    if (this.addressForm.invalid) {
+      this.addressForm.markAllAsTouched();
+      this.error = "Veuillez remplir tous les champs d'adresse correctement";
+      return;
+    }
+
+    this.checkoutLoading = true;
     this.error = null;
 
-    this.orderService.createCheckoutSession().subscribe({
+    const userAddress: UserAddress = this.addressForm.value;
+
+    this.orderService.createCheckoutSession(userAddress).subscribe({
       next: (checkoutSession) => {
-        // Rediriger vers l'URL de checkout
-        window.location.href = checkoutSession.url;
+        console.log('checkoutSession', checkoutSession);
+        console.log('checkoutSession.url', checkoutSession.url);
+        //window.location.href = checkoutSession.url;
       },
       error: (error) => {
         this.error = 'Erreur lors de la création de la session de paiement';
-        this.loading = false;
+        this.checkoutLoading = false;
         console.error('Erreur checkout:', error);
       },
     });
+  }
+
+  cancelAddressModal(): void {
+    this.showAddressModal = false;
+    this.addressForm.reset({
+      street: '',
+      city: '',
+      postalCode: '',
+      country: 'France',
+    });
+    this.error = null;
   }
 
   getTotalItems(): number {
@@ -114,46 +158,14 @@ export class CartComponent implements OnInit {
     return this.cart.items.reduce((total, item) => total + item.quantity, 0);
   }
 
-  // Configuration des boutons
-  getRetryButtonConfig(): ButtonConfig {
-    return {
-      style: 'default',
-      type: 'button',
-      size: 'medium',
-      display: 'text',
-      text: 'Réessayer',
-    };
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(price);
   }
 
-  getContinueShoppingButtonConfig(): ButtonConfig {
-    return {
-      style: 'default',
-      type: 'button',
-      size: 'medium',
-      display: 'text',
-      text: 'Continuer les achats',
-    };
-  }
-
-  getClearCartButtonConfig(): ButtonConfig {
-    return {
-      style: 'delete',
-      type: 'button',
-      size: 'medium',
-      display: 'text',
-      text: 'Vider le panier',
-      disabled: this.loading,
-    };
-  }
-
-  getCheckoutButtonConfig(): ButtonConfig {
-    return {
-      style: 'save',
-      type: 'button',
-      size: 'medium',
-      display: 'text',
-      text: 'Procéder au paiement',
-      disabled: this.loading,
-    };
+  isCartEmpty(): boolean {
+    return !this.cart?.items || this.cart.items.length === 0;
   }
 }

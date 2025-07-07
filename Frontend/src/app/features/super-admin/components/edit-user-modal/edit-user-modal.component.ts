@@ -36,4 +36,13 @@ export class EditUserModalComponent {
   toggleEditPasswordHandler(userId?: string): void {
     this.toggleEditPassword.emit(userId);
   }
+
+  onRoleChange(): void {
+    if (this.editingModalUser) {
+      // Si le rôle change et n'est plus ADMIN_STORE, on retire le store
+      if (this.editingModalUser.role !== 'ADMIN_STORE') {
+        this.editingModalUser.store = undefined;
+      }
+    }
+  }
 }

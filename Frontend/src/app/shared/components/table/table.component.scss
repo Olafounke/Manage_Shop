@@ -96,13 +96,21 @@
     th.lastName-col,
     td.lastName-col,
     th.password-col,
-    td.password-col {
+    td.password-col,
+    th.createdAt-col,
+    td.createdAt-col,
+    th.storeId-col,
+    td.storeId-col {
       @media (max-width: 1024px) {
         display: none;
       }
     }
     th.role-col,
-    td.role-col {
+    td.role-col,
+    th.store-col,
+    td.store-col,
+    th.storeAddress-col,
+    td.storeAddress-col {
       @media (max-width: 768px) {
         display: none;
       }

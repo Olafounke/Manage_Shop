@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import {
-  OrderService,
-  PaymentStatus,
-} from '../../../../core/services/order.service';
+import { OrderService } from '../../../../core/services/order.service';
+import { PaymentStatus } from '../../../../core/models/order.interface';
 
 @Component({
   selector: 'app-success',

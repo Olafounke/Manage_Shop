@@ -14,7 +14,7 @@
             <!-- Select -->
             <ng-container *ngSwitchCase="'select'">
               <select
-                *ngIf="isEditing(item)"
+                *ngIf="isEditing(item) && column.editable !== false"
                 [ngModel]="getValue(item, column.key)"
                 (ngModelChange)="onEditChange(item, column.key, $event)"
               >
@@ -22,7 +22,7 @@
                   {{ option }}
                 </option>
               </select>
-              <span *ngIf="!isEditing(item)">{{
+              <span *ngIf="!isEditing(item) || column.editable === false">{{
                 getValue(item, column.key)
               }}</span>
             </ng-container>
@@ -52,13 +52,13 @@
             <!-- Text -->
             <ng-container *ngSwitchDefault>
               <input
-                *ngIf="isEditing(item)"
+                *ngIf="isEditing(item) && column.editable !== false"
                 type="text"
                 [ngModel]="getValue(item, column.key)"
                 (ngModelChange)="onEditChange(item, column.key, $event)"
                 class="edit-input"
               />
-              <span *ngIf="!isEditing(item)">{{
+              <span *ngIf="!isEditing(item) || column.editable === false">{{
                 getValue(item, column.key)
               }}</span>
             </ng-container>
