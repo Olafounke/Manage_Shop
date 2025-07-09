@@ -72,8 +72,9 @@ class StoreController extends AbstractController
                 $store->setLatitude($data['latitude']);
             }
 
-            $store->setUserId($data['userId']);
-            
+            if (isset($data['userId'])) {
+                $store->setUserId($data['userId']);
+            }
 
             $this->entityManager->persist($store);
             $this->entityManager->flush();
