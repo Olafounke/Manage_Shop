@@ -90,18 +90,30 @@ foreach ($id in $availableIds) {
             Write-Host "[GEN-ERROR] [KO] Impossible d'extraire storeAddress" -ForegroundColor Red
         }
         
-        if ($longitudeResult -match "longitude:\s*([^']+)'") { 
+        if ($longitudeResult -match "longitude:\s*Decimal128\('([^']+)'\)") { 
             $longitude = $matches[1] 
             Write-Host "[GEN-LOG] [OK] longitude extrait: $longitude" -ForegroundColor Green
+        } elseif ($longitudeResult -match "longitude:\s*([0-9.-]+)") {
+            $longitude = $matches[1] 
+            Write-Host "[GEN-LOG] [OK] longitude extrait (format numérique): $longitude" -ForegroundColor Green
+        } elseif ($longitudeResult -match "longitude:\s*null") {
+            $longitude = ""
+            Write-Host "[GEN-LOG] [OK] longitude null" -ForegroundColor Yellow
         } else {
-            Write-Host "[GEN-ERROR] [KO] Impossible d'extraire longitude" -ForegroundColor Red
+            Write-Host "[GEN-ERROR] [KO] Impossible d'extraire longitude: $longitudeResult" -ForegroundColor Red
         }
         
-        if ($latitudeResult -match "latitude:\s*([^']+)'") { 
+        if ($latitudeResult -match "latitude:\s*Decimal128\('([^']+)'\)") { 
             $latitude = $matches[1] 
             Write-Host "[GEN-LOG] [OK] latitude extrait: $latitude" -ForegroundColor Green
+        } elseif ($latitudeResult -match "latitude:\s*([0-9.-]+)") {
+            $latitude = $matches[1] 
+            Write-Host "[GEN-LOG] [OK] latitude extrait (format numérique): $latitude" -ForegroundColor Green
+        } elseif ($latitudeResult -match "latitude:\s*null") {
+            $latitude = ""
+            Write-Host "[GEN-LOG] [OK] latitude null" -ForegroundColor Yellow
         } else {
-            Write-Host "[GEN-ERROR] [KO] Impossible d'extraire latitude" -ForegroundColor Red
+            Write-Host "[GEN-ERROR] [KO] Impossible d'extraire latitude: $latitudeResult" -ForegroundColor Red
         }
         
         if ($userResult -match "userId:\s*'([^']+)'") { 
