@@ -28,7 +28,7 @@ export class ProductCardComponent {
   getDefaultImage(): string {
     return this.product.images && this.product.images.length > 0
       ? this.product.images[0]
-      : 'assets/images/default-product.jpg';
+      : 'assets/images/default-product.png';
   }
 
   formatPrice(price: number): string {
@@ -36,5 +36,13 @@ export class ProductCardComponent {
       style: 'currency',
       currency: 'EUR',
     }).format(price);
+  }
+
+  getCategoryName(category: any): string {
+    return typeof category === 'string'
+      ? category
+      : category && category.name
+      ? category.name
+      : '';
   }
 }

@@ -1,15 +1,17 @@
 <div class="search-bar">
-  <div class="search-input-container">
-    <input
-      type="text"
-      [(ngModel)]="searchTerm"
-      (keyup.enter)="onSearch()"
-      placeholder="Rechercher un produit..."
-      class="search-input"
-    />
-    <button (click)="onSearch()" class="search-button" type="button">
-      <i class="search-icon">🔍</i>
-    </button>
+  <div class="search-bar-row">
+    <div class="search-input-container">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch()"
+        placeholder="Rechercher un produit..."
+        class="search-input"
+      />
+      <button (click)="onSearch()" class="search-button" type="button">
+        <mat-icon class="search-icon">search</mat-icon>
+      </button>
+    </div>
     <button
       *ngIf="searchTerm"
       (click)="onClear()"

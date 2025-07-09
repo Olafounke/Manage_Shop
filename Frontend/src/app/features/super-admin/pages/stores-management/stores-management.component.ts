@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Store } from '../../../../core/models/store.interface';
+import { Store, StoreStatus } from '../../../../core/models/store.interface';
 import { User } from '../../../../core/models/user.interface';
 
 interface StoreDisplay {
@@ -14,6 +14,7 @@ interface StoreDisplay {
   latitude?: string;
   userId?: string;
   userEmail: string;
+  status: StoreStatus;
   createdAt: string;
   updatedAt: Date;
 }
@@ -60,7 +61,6 @@ export class StoresManagementComponent implements OnInit {
       editable: true,
     },
     { key: 'storeAddress', header: 'Adresse', type: 'text', editable: true },
-    { key: 'storeId', header: 'ID du magasin', type: 'text', editable: false },
     {
       key: 'userEmail',
       header: 'Email utilisateur',
@@ -69,9 +69,9 @@ export class StoresManagementComponent implements OnInit {
       options: this.availableEmails,
     },
     {
-      key: 'createdAt',
-      header: 'Date de création',
-      type: 'text',
+      key: 'status',
+      header: 'Statut',
+      type: 'status',
       editable: false,
     },
     {
@@ -123,6 +123,7 @@ export class StoresManagementComponent implements OnInit {
           userEmail: this.getUserEmail(store.userId),
           createdAt: this.formatDate(store.createdAt),
           storeAddress: store.storeAddress,
+          status: store.status || ('deployed' as StoreStatus),
         }));
       },
       error: (err) =>
@@ -152,6 +153,7 @@ export class StoresManagementComponent implements OnInit {
       userEmail: this.getUserEmail(store.userId),
       createdAt: this.formatDate(store.createdAt),
       storeAddress: store.storeAddress,
+      status: store.status || ('deployed' as StoreStatus),
     };
   }
 
@@ -258,19 +260,55 @@ export class StoresManagementComponent implements OnInit {
     this.addStoreModal.toggleAddStore();
   }
 
+  onStoreCreationStart(storeName: string): void {
+    // Ajouter un magasin temporaire avec le statut "pending"
+    const pendingStore: StoreDisplay = {
+      id: 0,
+      storeId: `temp-${Date.now()}`,
+      storeName: storeName,
+      storeNameSlug: '',
+      storeAddress: 'En cours de création...',
+      userId: undefined,
+      userEmail: '',
+      status: 'pending',
+      createdAt: this.formatDate(new Date()),
+      updatedAt: new Date(),
+    };
+    this.stores.unshift(pendingStore);
+  }
+
+  onStoreCreated(): void {
+    // Supprimer les magasins temporaires et rafraîchir la liste
+    this.stores = this.stores.filter(
+      (store) => !store.storeId.startsWith('temp-')
+    );
+    this.getAllStores();
+  }
+
   toggleConfirmDelete(storeId: string): void {
     this.confirmDeleteModal.toggleConfirmDelete(storeId);
   }
 
   onConfirmDelete(storeId: string): void {
+    // Mettre le statut en "deleting" avant la suppression
+    const storeIndex = this.stores.findIndex((s) => s.storeId === storeId);
+    if (storeIndex !== -1) {
+      this.stores[storeIndex].status = 'deleting';
+    }
+
     // Supprimer le magasin via l'API
     this.storeService.deleteStore(storeId).subscribe({
       next: () => {
         // Mettre à jour la liste locale après suppression
         this.stores = this.stores.filter((s) => s.storeId !== storeId);
       },
-      error: (err) =>
-        console.error('Erreur lors de la suppression du magasin:', err),
+      error: (err) => {
+        console.error('Erreur lors de la suppression du magasin:', err);
+        // En cas d'erreur, remettre le statut à "deployed"
+        if (storeIndex !== -1) {
+          this.stores[storeIndex].status = 'deployed';
+        }
+      },
     });
   }
 }

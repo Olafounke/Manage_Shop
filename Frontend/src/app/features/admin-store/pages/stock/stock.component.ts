@@ -2,7 +2,9 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InventoryItem } from '../../../../core/models/inventory.interface';
+import { Product } from '../../../../core/models/product.interface';
 import { InventoryService } from '../../../../core/services/inventory.service';
+import { ProductService } from '../../../../core/services/product.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { TableComponent } from '../../../../shared/components/table/table.component';
@@ -11,8 +13,7 @@ import { GenericConfirmDeleteModalComponent } from '../../../../shared/component
 import { UserService } from '../../../../core/services/user.service';
 
 interface StockDisplay extends InventoryItem {
-  createdAtText: string;
-  updatedAtText: string;
+  totalQuantity?: number;
 }
 
 @Component({
@@ -34,26 +35,23 @@ export class StockComponent implements OnInit {
 
   stocks: StockDisplay[] = [];
   userStoreId: string = '';
-  isResponsive = window.innerWidth <= 1024;
 
   tableColumns: TableColumn[] = [
-    { key: 'productId', header: 'ID Produit', type: 'text', editable: false },
     {
       key: 'productName',
       header: 'Nom du produit',
       type: 'text',
-      editable: true,
-    },
-    { key: 'quantity', header: 'Quantité', type: 'text', editable: true },
-    {
-      key: 'createdAtText',
-      header: 'Date de création',
-      type: 'text',
       editable: false,
     },
     {
-      key: 'updatedAtText',
-      header: 'Dernière modification',
+      key: 'quantity',
+      header: 'Quantité locale',
+      type: 'text',
+      editable: true,
+    },
+    {
+      key: 'totalQuantity',
+      header: 'Quantité totale',
       type: 'text',
       editable: false,
     },
@@ -67,12 +65,9 @@ export class StockComponent implements OnInit {
 
   constructor(
     private inventoryService: InventoryService,
+    private productService: ProductService,
     private userService: UserService
-  ) {
-    window.addEventListener('resize', () => {
-      this.isResponsive = window.innerWidth <= 1024;
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.userStoreId = this.userService.getUserStore();
@@ -80,12 +75,11 @@ export class StockComponent implements OnInit {
   }
 
   getAllStocks(): void {
-    console.log('getAllStocks', this.userStoreId);
     if (!this.userStoreId) return;
     this.inventoryService.getInventoryByStore(this.userStoreId).subscribe({
       next: (stocks) => {
-        console.log('stocks', stocks);
         this.stocks = stocks.map((stock) => this.convertStockToDisplay(stock));
+        this.loadTotalQuantities();
       },
       error: (err) =>
         console.error('Erreur lors de la récupération des stocks:', err),
@@ -95,18 +89,25 @@ export class StockComponent implements OnInit {
   convertStockToDisplay(stock: InventoryItem): StockDisplay {
     return {
       ...stock,
-      createdAtText: this.formatDate(stock.createdAt),
-      updatedAtText: this.formatDate(stock.updatedAt),
+      totalQuantity: 0, // Sera mis à jour par loadTotalQuantities
     };
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+  loadTotalQuantities(): void {
+    // Récupérer les informations de quantité totale pour chaque produit
+    this.stocks.forEach((stock) => {
+      this.productService.getProductById(stock.productId).subscribe({
+        next: (product: Product) => {
+          stock.totalQuantity = product.totalInventory || 0;
+        },
+        error: (err) => {
+          console.error(
+            `Erreur lors de la récupération du produit ${stock.productId}:`,
+            err
+          );
+          stock.totalQuantity = 0;
+        },
+      });
     });
   }
 
@@ -117,7 +118,6 @@ export class StockComponent implements OnInit {
     if (this.editingStock && this.editingStock.productId) {
       const updateData = {
         quantity: this.editingStock.quantity,
-        productName: this.editingStock.productName,
       };
 
       this.inventoryService
@@ -133,6 +133,9 @@ export class StockComponent implements OnInit {
             );
             if (index !== -1) {
               this.stocks[index] = this.convertStockToDisplay(updatedStock);
+              // Conserver la quantité totale
+              this.stocks[index].totalQuantity =
+                this.editingStock!.totalQuantity;
             }
             this.editingStock = null;
           },
@@ -143,10 +146,10 @@ export class StockComponent implements OnInit {
   }
 
   onEditChange(event: { item: StockDisplay; key: string; value: any }): void {
-    if (this.editingStock) {
+    if (this.editingStock && event.key === 'quantity') {
       this.editingStock = {
         ...this.editingStock,
-        [event.key]: event.value,
+        quantity: parseInt(event.value) || 0,
       };
     }
   }

@@ -1,1 +1,136 @@
-<main><p>orders works!</p></main>
+<div class="orders-container">
+  <!-- Header -->
+  <div class="orders-header">
+    <h1>Mes Commandes</h1>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <p>Chargement de vos commandes...</p>
+  </div>
+
+  <!-- État d'erreur -->
+  <div *ngIf="error && !loading" class="error-state">
+    <p>{{ error }}</p>
+    <app-button
+      [config]="{
+        style: 'default',
+        type: 'button',
+        size: 'medium',
+        display: 'text',
+        text: 'Réessayer'
+      }"
+      (onClick)="loadUserOrders()"
+    />
+  </div>
+
+  <!-- Aucune commande -->
+  <div *ngIf="!hasOrders() && !loading && !error" class="no-orders">
+    <div class="no-orders-content">
+      <h2>Aucune commande trouvée</h2>
+      <p>Vous n'avez pas encore passé de commande</p>
+      <app-button
+        [config]="{
+          style: 'default',
+          type: 'button',
+          size: 'medium',
+          display: 'text',
+          text: 'Commencer mes achats'
+        }"
+        [routerLink]="['/']"
+      />
+    </div>
+  </div>
+
+  <!-- Liste des commandes -->
+  <div *ngIf="hasOrders() && !loading" class="orders-list">
+    <div
+      *ngFor="let orderGroup of orderGroups"
+      class="order-card"
+      [class.expanded]="orderGroup.isExpanded"
+    >
+      <!-- En-tête de la commande (toujours visible) -->
+      <div class="order-header" (click)="toggleOrderGroup(orderGroup)">
+        <div class="order-main-info">
+          <div class="order-id">
+            <h3>Commande #{{ orderGroup._id.slice(-8) }}</h3>
+            <span class="order-date">{{ orderGroup.createdAtText }}</span>
+          </div>
+
+          <div class="order-summary">
+            <div class="order-amount">
+              {{ formatPrice(orderGroup.totalAmount) }}
+            </div>
+            <div
+              class="order-status"
+              [class]="getStatusClass(orderGroup.status)"
+            >
+              {{ orderGroup.statusText }}
+            </div>
+          </div>
+        </div>
+
+        <div class="order-toggle">
+          <div class="order-stores-count">
+            {{ orderGroup.orders.length }} magasin(s)
+          </div>
+          <div class="expand-icon" [class.rotated]="orderGroup.isExpanded">
+            <span>▼</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails de la commande (visible quand expanded) -->
+      <div *ngIf="orderGroup.isExpanded" class="order-details">
+        <!-- Adresse de livraison -->
+        <div class="delivery-address">
+          <h4>Adresse de livraison</h4>
+          <p>{{ orderGroup.userAddress.fullAddress }}</p>
+        </div>
+
+        <!-- Détails par magasin -->
+        <div *ngIf="orderGroup.orderDetails" class="store-orders">
+          <h4>Détail par magasin</h4>
+
+          <div
+            *ngFor="let order of orderGroup.orderDetails"
+            class="store-order"
+          >
+            <div class="store-header">
+              <div class="store-info">
+                <h5>Magasin {{ order.storeId }}</h5>
+                <span
+                  class="order-status-small"
+                  [class]="getOrderStatusClass(order.status)"
+                >
+                  {{ getOrderStatusText(order.status) }}
+                </span>
+              </div>
+              <div class="store-total">
+                <span class="total-label">Sous-total:</span>
+                {{ formatPrice(order.subtotal) }}
+              </div>
+            </div>
+
+            <!-- Articles de cette commande -->
+            <div class="order-items">
+              <h6>Produits commandés:</h6>
+              <div *ngFor="let item of order.items" class="order-item">
+                <div class="item-info">
+                  <span class="item-name">{{ item.productName }}</span>
+                  <span class="item-details">
+                    Quantité: {{ item.quantity }} × Prix:
+                    {{ formatPrice(item.unitPrice) }}
+                  </span>
+                </div>
+                <div class="item-total">
+                  {{ formatPrice(item.totalPrice) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

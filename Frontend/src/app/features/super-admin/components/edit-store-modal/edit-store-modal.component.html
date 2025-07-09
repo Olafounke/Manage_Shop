@@ -25,7 +25,7 @@
       />
     </div>
     <div class="form-group">
-      <label for="edit-userEmail">Email utilisateur (optionnel)</label>
+      <label for="edit-userEmail">Email utilisateur</label>
       <select id="edit-userEmail" [(ngModel)]="selectedEmail" name="userEmail">
         <option value="">-- Aucun utilisateur --</option>
         <option *ngFor="let email of availableEmails.slice(1)" [value]="email">

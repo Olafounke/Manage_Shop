@@ -1,3 +1,5 @@
+export type StoreStatus = 'deployed' | 'deleting' | 'pending';
+
 export interface Store {
   id: number;
   storeId: string;
@@ -7,6 +9,7 @@ export interface Store {
   longitude?: string;
   latitude?: string;
   userId?: string;
+  status?: StoreStatus;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,14 +1,13 @@
 .cancel-container {
-  min-height: 100vh;
+  min-height: 75vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   padding: 20px;
 }
 
 .cancel-card {
-  background: white;
+  background: rgba(44, 53, 68, 0.85);
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -32,20 +31,20 @@
 h1 {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #fff;
   margin: 0;
 }
 
 p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #ffffff60;
   line-height: 1.6;
   margin: 0;
 }
 
 .info {
   font-size: 1rem;
-  color: #9ca3af;
+  color: #ffffffaa;
   font-style: italic;
 }
 

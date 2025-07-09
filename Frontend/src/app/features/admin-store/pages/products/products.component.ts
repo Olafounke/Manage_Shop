@@ -11,10 +11,15 @@ import { AddProductModalComponent } from '../../components/add-product-modal/add
 import { EditProductModalComponent } from '../../components/edit-product-modal/edit-product-modal.component';
 import { GenericConfirmDeleteModalComponent } from '../../../../shared/components/generic-confirm-delete-modal/generic-confirm-delete-modal.component';
 
-interface ProductDisplay extends Omit<Product, 'createdAt'> {
-  createdAt: string;
-  categoriesText: string;
+interface ProductDisplay
+  extends Pick<
+    Product,
+    '_id' | 'name' | 'description' | 'price' | 'stores' | 'categories'
+  > {
   priceText: string;
+  storesText: string;
+  categoriesText: string;
+  descriptionText: string;
 }
 
 @Component({
@@ -42,26 +47,23 @@ export class ProductsComponent implements OnInit {
 
   products: ProductDisplay[] = [];
   categories: string[] = [];
-  isResponsive = window.innerWidth <= 1024;
 
   tableColumns: TableColumn[] = [
-    { key: 'name', header: 'Nom du produit', type: 'text', editable: true },
-    { key: 'description', header: 'Description', type: 'text', editable: true },
-    { key: 'priceText', header: 'Prix', type: 'text', editable: true },
+    { key: 'name', header: 'Nom du produit', type: 'text', editable: false },
+    {
+      key: 'descriptionText',
+      header: 'Description',
+      type: 'text',
+      editable: false,
+    },
+    { key: 'priceText', header: 'Prix', type: 'text', editable: false },
     {
       key: 'categoriesText',
       header: 'Catégories',
       type: 'text',
       editable: false,
     },
-    { key: 'totalInventory', header: 'Stock', type: 'text', editable: true },
-    { key: 'inStock', header: 'En stock', type: 'text', editable: false },
-    {
-      key: 'createdAt',
-      header: 'Date de création',
-      type: 'text',
-      editable: false,
-    },
+    { key: 'storesText', header: 'Stores', type: 'text', editable: false },
     {
       key: 'actions',
       header: 'Actions',
@@ -73,11 +75,7 @@ export class ProductsComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService
-  ) {
-    window.addEventListener('resize', () => {
-      this.isResponsive = window.innerWidth <= 1024;
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.getCategories();
@@ -106,63 +104,63 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  private truncate(text: string, maxLength: number): string {
+    if (!text) return '';
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  }
+
   convertProductToDisplay(product: Product): ProductDisplay {
+    // On s'assure que categories est toujours un tableau d'objets ou de chaînes
+    const categories = Array.isArray(product.categories)
+      ? product.categories.map((cat: any) =>
+          typeof cat === 'string' ? cat : cat && cat.name ? cat.name : ''
+        )
+      : [];
+    // Nouveau format stores: [{id, name}]
+    const stores = Array.isArray(product.stores)
+      ? product.stores.map((store: any) =>
+          store && store.name ? store.name : ''
+        )
+      : [];
+
     return {
-      ...product,
-      createdAt: this.formatDate(product.createdAt),
-      categoriesText: product.categories
-        ? product.categories.join(', ')
-        : 'Aucune',
+      _id: product._id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stores: product.stores,
+      categories: product.categories,
       priceText: `${product.price.toFixed(2)} €`,
+      storesText:
+        stores.filter((s) => !!s).length > 0
+          ? this.truncate(stores.filter((s) => !!s).join(', '), 30)
+          : '',
+      categoriesText:
+        categories.length > 0 ? this.truncate(categories.join(', '), 30) : '',
+      descriptionText: product.description
+        ? this.truncate(product.description, 30)
+        : '',
     };
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
-
-  // Différents éléments pour l'update d'un produit
-  editingProduct: ProductDisplay | null = null;
-
-  updateProduct(product?: ProductDisplay): void {
-    const productToUpdate =
-      product ||
-      this.editingProduct ||
-      (this.editProductModal.editingModalProduct
-        ? this.convertProductToDisplay(
-            this.editProductModal.editingModalProduct
-          )
-        : null);
+  updateProduct(): void {
+    const productToUpdate = this.editProductModal.editingModalProduct;
 
     if (productToUpdate && productToUpdate._id) {
-      // Convertir les données d'affichage en données API
       const updateData: Partial<Product> = {
         name: productToUpdate.name,
         description: productToUpdate.description,
-        price: parseFloat(
-          productToUpdate.priceText.replace(' €', '').replace(',', '.')
-        ),
+        price: productToUpdate.price,
+        categories: productToUpdate.categories,
+        images: productToUpdate.images,
         totalInventory: productToUpdate.totalInventory,
       };
 
       this.productService
         .updateProduct(productToUpdate._id, updateData)
         .subscribe({
-          next: (updatedProduct) => {
-            const index = this.products.findIndex(
-              (p) => p._id === productToUpdate._id
-            );
-            if (index !== -1) {
-              this.products[index] =
-                this.convertProductToDisplay(updatedProduct);
-            }
-            this.editingProduct = null;
+          next: () => {
+            this.getMyProducts();
             this.editProductModal.editingModalProduct = null;
             this.editProductModal.showEditModal = false;
           },
@@ -172,45 +170,33 @@ export class ProductsComponent implements OnInit {
     }
   }
 
-  onEditChange(event: { item: ProductDisplay; key: string; value: any }): void {
-    if (this.editingProduct) {
-      this.editingProduct = {
-        ...this.editingProduct,
-        [event.key]: event.value,
-      };
-    }
-  }
-
-  toggleEditProduct(product?: ProductDisplay): void {
-    if (this.isResponsive && !this.editingProduct) {
-      // Convertir ProductDisplay en Product pour le modal
-      const productForModal: Product = {
-        _id: product?._id || '',
-        name: product?.name || '',
-        description: product?.description,
-        price: parseFloat(
-          product?.priceText?.replace(' €', '').replace(',', '.') || '0'
-        ),
-        images: product?.images,
-        categories: product?.categories,
-        owner: product?.owner || '',
-        stores: product?.stores || [],
-        customFields: product?.customFields,
-        totalInventory: product?.totalInventory,
-        inStock: product?.inStock,
-        createdAt: new Date(product?.createdAt || ''),
-        updatedAt: product?.updatedAt || new Date(),
-      };
-      this.editProductModal.toggleEditProduct(productForModal);
-    } else {
-      if (product) {
-        this.editingProduct = { ...product };
-      } else {
-        this.editingProduct = null;
-        this.editProductModal.showEditModal = false;
-        this.editProductModal.editingModalProduct = null;
-      }
-    }
+  toggleEditProduct(product: ProductDisplay): void {
+    // Récupérer le produit complet depuis le backend pour avoir toutes les données
+    this.productService.getProductById(product._id).subscribe({
+      next: (fullProduct) => {
+        this.editProductModal.toggleEditProduct(fullProduct);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération du produit:', err);
+        // Fallback : utiliser les données disponibles
+        const productForModal: Product = {
+          _id: product._id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          images: [],
+          categories: product.categories || [],
+          owner: '',
+          stores: product.stores,
+          customFields: {},
+          totalInventory: 0,
+          inStock: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        this.editProductModal.toggleEditProduct(productForModal);
+      },
+    });
   }
 
   toggleAddProduct(): void {
@@ -222,10 +208,8 @@ export class ProductsComponent implements OnInit {
   }
 
   onConfirmDelete(productId: string): void {
-    // Supprimer le produit via l'API
     this.productService.deleteProduct(productId).subscribe({
       next: () => {
-        // Mettre à jour la liste locale après suppression
         this.products = this.products.filter((p) => p._id !== productId);
       },
       error: (err) =>

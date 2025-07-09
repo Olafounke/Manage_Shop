@@ -28,7 +28,11 @@ export class OrderService {
   }
 
   getOrderById(id: string): Observable<Order> {
-    return this.http.get<Order>(`${this.apiUrl}/${id}`);
+    return this.http.get<Order>(`${this.apiUrl}/${id}/order`);
+  }
+
+  getOrderGroupById(id: string): Observable<OrderGroup> {
+    return this.http.get<OrderGroup>(`${this.apiUrl}/${id}/groupOrder`);
   }
 
   createCheckoutSession(userAddress: UserAddress): Observable<CheckoutSession> {

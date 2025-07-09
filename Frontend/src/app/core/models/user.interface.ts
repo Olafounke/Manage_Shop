@@ -11,3 +11,7 @@ export interface User {
 export interface Token {
   token: string;
 }
+
+export interface EnrichedUser extends User {
+  storeName?: string;
+}

@@ -1,23 +1,24 @@
+.search-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .search-bar {
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
 
   .search-input-container {
+    flex: 1 1 0;
+    min-width: 0;
     position: relative;
     display: flex;
     align-items: center;
-    background: white;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #34495e;
     border-radius: 25px;
     overflow: hidden;
     transition: border-color 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-    &:focus-within {
-      border-color: #007bff;
-      box-shadow: 0 2px 12px rgba(0, 123, 255, 0.2);
-    }
   }
 
   .search-input {
@@ -27,45 +28,56 @@
     outline: none;
     font-size: 16px;
     background: transparent;
+    color: #ecf0f1;
 
     &::placeholder {
-      color: #999;
+      color: #bdc3c7;
     }
   }
 
   .search-button {
-    background: #007bff;
-    border: none;
+    background: rgba(52, 152, 219, 0.13);
+    border: 1.5px solid #3498db;
+    color: #3498db;
     padding: 12px 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 0 25px 25px 0;
 
     &:hover {
-      background: #0056b3;
+      background: rgba(52, 152, 219, 0.22);
+      color: #217dbb;
+      border-color: #217dbb;
+    }
+    & mat-icon {
+      width: 100%;
+      height: 100%;
     }
 
     .search-icon {
       font-size: 16px;
-      color: white;
+      color: inherit;
     }
   }
 
   .clear-button {
-    background: #dc3545;
-    border: none;
+    background: rgba(231, 76, 60, 0.13);
+    border: 1.5px solid #e74c3c;
+    color: #e74c3c;
     padding: 8px 12px;
     cursor: pointer;
-    color: white;
     font-size: 14px;
     border-radius: 50%;
     margin-right: 8px;
-    transition: background-color 0.3s ease;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
 
     &:hover {
-      background: #c82333;
+      background: rgba(231, 76, 60, 0.22);
+      color: #c0392b;
+      border-color: #c0392b;
     }
   }
 }

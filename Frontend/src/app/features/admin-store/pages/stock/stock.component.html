@@ -32,9 +32,7 @@
       />
     </ng-container>
 
-    <ng-container
-      *ngIf="!isResponsive && editingStock && editingStock.id === item.id"
-    >
+    <ng-container *ngIf="editingStock && editingStock.id === item.id">
       <app-button
         [config]="{
           style: 'save',

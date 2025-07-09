@@ -27,6 +27,40 @@
               }}</span>
             </ng-container>
 
+            <!-- Status -->
+            <div *ngSwitchCase="'status'" class="status-column">
+              <ng-container [ngSwitch]="getValue(item, column.key)">
+                <span
+                  *ngSwitchCase="'deployed'"
+                  class="status-deployed"
+                  title="Déployé"
+                >
+                  <i class="material-icons">check_circle</i>
+                </span>
+                <span
+                  *ngSwitchCase="'deleting'"
+                  class="status-deleting"
+                  title="Suppression en cours"
+                >
+                  <i class="material-icons rotating">delete</i>
+                </span>
+                <span
+                  *ngSwitchCase="'pending'"
+                  class="status-pending"
+                  title="Ajout en cours"
+                >
+                  <i class="material-icons rotating">hourglass_empty</i>
+                </span>
+                <span
+                  *ngSwitchDefault
+                  class="status-unknown"
+                  title="Statut inconnu"
+                >
+                  <i class="material-icons">help_outline</i>
+                </span>
+              </ng-container>
+            </div>
+
             <!-- Actions -->
             <div *ngSwitchCase="'actions'" class="actions">
               <ng-container *ngIf="column.template === 'passwordTemplate'">

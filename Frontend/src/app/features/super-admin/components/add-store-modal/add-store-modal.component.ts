@@ -17,6 +17,7 @@ import { StoreService } from '../../../../core/services/store.service';
 export class AddStoreModalComponent {
   @Input() users: User[] = [];
   @Output() refreshStores = new EventEmitter<void>();
+  @Output() storeCreationStart = new EventEmitter<string>();
 
   showAddStoreModal = false;
   availableEmails: string[] = [];
@@ -32,6 +33,9 @@ export class AddStoreModalComponent {
 
   addStore(): void {
     if (this.validateNewStore()) {
+      // Émettre l'événement de début de création
+      this.storeCreationStart.emit(this.newStore.storeName);
+
       // Convertir l'email en userId si un email est sélectionné
       if (this.selectedEmail && this.selectedEmail !== '') {
         const selectedUser = this.users.find(
@@ -47,8 +51,11 @@ export class AddStoreModalComponent {
           this.refreshStores.emit();
           this.toggleAddStore();
         },
-        error: (err) =>
-          console.error("Erreur lors de l'ajout du magasin:", err),
+        error: (err) => {
+          console.error("Erreur lors de l'ajout du magasin:", err);
+          // En cas d'erreur, rafraîchir quand même pour supprimer l'entrée "pending"
+          this.refreshStores.emit();
+        },
       });
     }
   }

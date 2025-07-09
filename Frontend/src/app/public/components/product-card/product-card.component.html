@@ -21,7 +21,7 @@
       *ngIf="product.categories && product.categories.length > 0"
     >
       <span *ngFor="let category of product.categories" class="category-tag">
-        {{ category }}
+        {{ getCategoryName(category) }}
       </span>
     </div>
 

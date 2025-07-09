@@ -115,6 +115,12 @@
         display: none;
       }
     }
+
+    // Garde la colonne status visible sur mobile car c'est important
+    th.status-col,
+    td.status-col {
+      min-width: 80px;
+    }
   }
 }
 
@@ -150,5 +156,46 @@ select {
   &:focus {
     border: 1.5px solid #3b82f6;
     background: rgba(44, 53, 68, 1);
+  }
+}
+
+// Styles pour les statuts
+.status-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-icons {
+    font-size: 1.5rem;
+  }
+
+  .status-deployed {
+    color: #10b981; // Vert pour déployé
+  }
+
+  .status-deleting {
+    color: #ef4444; // Rouge pour suppression
+  }
+
+  .status-pending {
+    color: #f59e0b; // Orange pour en attente
+  }
+
+  .status-unknown {
+    color: #6b7280; // Gris pour inconnu
+  }
+
+  // Animation de rotation pour les statuts en cours
+  .rotating {
+    animation: rotate 2s linear infinite;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

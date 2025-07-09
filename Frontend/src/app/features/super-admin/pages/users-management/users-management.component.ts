@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../../../core/models/user.interface';
+import { EnrichedUser } from '../../../../core/models/user.interface';
 import { Store } from '../../../../core/models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { StoreService } from '../../../../core/services/store.service';
@@ -37,7 +37,7 @@ export class UsersManagementComponent implements OnInit {
   @ViewChild(ConfirmDeleteModalComponent)
   confirmDeleteModal!: ConfirmDeleteModalComponent;
 
-  users: User[] = [];
+  users: EnrichedUser[] = [];
   stores: Store[] = [];
   availableStores: string[] = [];
   isResponsive = window.innerWidth <= 1024;
@@ -61,10 +61,9 @@ export class UsersManagementComponent implements OnInit {
       options: this.availableRoles,
     },
     {
-      key: 'store',
+      key: 'storeName',
       header: 'Magasin',
-      type: 'select',
-      options: this.availableStores,
+      type: 'text',
     },
     {
       key: 'actions',
@@ -84,27 +83,29 @@ export class UsersManagementComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getAllStores();
     this.getAllUsers();
+    this.getAllStores(); // Encore nécessaire pour les modals d'ajout/édition
   }
 
   getAllUsers(): void {
     this.authService.getAllUsers().subscribe({
       next: (users) => {
-        this.users = users.map((user) => ({
-          ...user,
-          store: this.getStoreName(user.store),
-        }));
+        this.users = users;
       },
       error: (err) =>
         console.error('Erreur lors de la récupération des utilisateurs:', err),
     });
   }
 
-  getStoreName(storeId: string | null | undefined): string {
-    if (!storeId) return '-';
-    const store = this.stores.find((s) => s.storeId === storeId);
-    return store ? store.storeName : '-';
+  getAllStores(): void {
+    this.storeService.getAllStores().subscribe({
+      next: (stores) => {
+        this.stores = stores;
+        this.availableStores = ['-', ...stores.map((store) => store.storeName)];
+      },
+      error: (err) =>
+        console.error('Erreur lors de la récupération des stores:', err),
+    });
   }
 
   getStoreId(storeName: string): string | undefined {
@@ -113,7 +114,7 @@ export class UsersManagementComponent implements OnInit {
     return store?.storeId;
   }
 
-  getAvailableStoresForUser(currentUser: User): string[] {
+  getAvailableStoresForUser(currentUser: EnrichedUser): string[] {
     const usedStores = this.users
       .filter(
         (user) =>
@@ -124,35 +125,18 @@ export class UsersManagementComponent implements OnInit {
       .map((user) => user.store);
 
     const availableStores = this.stores
-      .filter((store) => !usedStores.includes(store.storeName))
+      .filter((store) => !usedStores.includes(store.storeId))
       .map((store) => store.storeName);
 
     return ['-', ...availableStores];
   }
 
-  getAllStores(): void {
-    this.storeService.getAllStores().subscribe({
-      next: (stores) => {
-        this.stores = stores;
-        this.availableStores = ['-', ...stores.map((store) => store.storeName)];
-        const storeColumn = this.tableColumns.find(
-          (col) => col.key === 'store'
-        );
-        if (storeColumn) {
-          storeColumn.options = this.availableStores;
-        }
-      },
-      error: (err) =>
-        console.error('Erreur lors de la récupération des magasins:', err),
-    });
-  }
-
   // Différents éléments pour l'update d'un utilisateur
-  editingUser: User | null = null;
+  editingUser: EnrichedUser | null = null;
 
   updateUser(newPassword?: boolean): void {
     let _id: string;
-    let updateData: Partial<User>;
+    let updateData: Partial<EnrichedUser>;
     const userToUpdate =
       this.editingUser || this.editUserModal.editingModalUser;
 
@@ -170,31 +154,23 @@ export class UsersManagementComponent implements OnInit {
         firstName: userToUpdate.firstName,
         lastName: userToUpdate.lastName,
         role: userToUpdate.role,
-        store: userToUpdate.store,
+        store: userToUpdate.store, // C'est toujours le storeId original
       };
-      console.log(updateData);
 
-      // Convertir le storeName en storeId avant l'update
-      if (updateData.store && updateData.store !== '-') {
-        updateData.store = this.getStoreId(updateData.store as string);
-      } else {
+      // Si storeName a été modifié en mode édition, convertir en storeId
+      const enrichedUser = userToUpdate as EnrichedUser;
+      if (enrichedUser.storeName && enrichedUser.storeName !== '-') {
+        updateData.store = this.getStoreId(enrichedUser.storeName);
+      } else if (enrichedUser.storeName === '-') {
         updateData.store = '-';
       }
-      console.log(updateData);
     } else {
       return;
     }
 
     this.authService.updateUser(_id, updateData).subscribe({
       next: () => {
-        const index = this.users.findIndex((u) => u._id === _id);
-        if (index !== -1) {
-          this.users[index] = {
-            ...this.users[index],
-            ...updateData,
-            store: this.getStoreName(updateData.store),
-          };
-        }
+        this.getAllUsers();
         this.editingUser = null;
         this.editUserModal.editingModalUser = null;
         this.editUserModal.showEditModal = false;
@@ -203,17 +179,17 @@ export class UsersManagementComponent implements OnInit {
     });
   }
 
-  onEditChange(event: { item: User; key: string; value: any }): void {
+  onEditChange(event: { item: EnrichedUser; key: string; value: any }): void {
     if (this.editingUser) {
       if (event.key === 'role') {
-        // Si le rôle change, mettre à jour la colonne store
+        // Si le rôle change, mettre à jour la colonne storeName
         this.editingUser = {
           ...this.editingUser,
           [event.key]: event.value,
         };
         this.onStartEdit(this.editingUser);
       } else if (
-        event.key === 'store' &&
+        event.key === 'storeName' &&
         this.editingUser.role !== 'ADMIN_STORE'
       ) {
         // Empêcher la modification du store si pas ADMIN_STORE
@@ -227,22 +203,26 @@ export class UsersManagementComponent implements OnInit {
     }
   }
 
-  onStartEdit(user: User): void {
-    const storeColumn = this.tableColumns.find((col) => col.key === 'store');
+  onStartEdit(user: EnrichedUser): void {
+    const storeColumn = this.tableColumns.find(
+      (col) => col.key === 'storeName'
+    );
     if (storeColumn) {
       if (user.role === 'ADMIN_STORE') {
         storeColumn.editable = true;
+        storeColumn.type = 'select';
         storeColumn.options = this.getAvailableStoresForUser(user);
       } else {
         storeColumn.editable = false;
+        storeColumn.type = 'text';
         if (this.editingUser) {
-          this.editingUser.store = '-';
+          this.editingUser.storeName = '-';
         }
       }
     }
   }
 
-  toggleEditUser(user?: User): void {
+  toggleEditUser(user?: EnrichedUser): void {
     if (this.isResponsive && !this.editingUser) {
       this.editUserModal.toggleEditUser(user);
     } else {
@@ -253,6 +233,15 @@ export class UsersManagementComponent implements OnInit {
         this.editingUser = null;
         this.editUserModal.showEditModal = false;
         this.editUserModal.editingModalUser = null;
+
+        // Remettre la colonne storeName en mode text
+        const storeColumn = this.tableColumns.find(
+          (col) => col.key === 'storeName'
+        );
+        if (storeColumn) {
+          storeColumn.type = 'text';
+          storeColumn.editable = false;
+        }
       }
     }
   }

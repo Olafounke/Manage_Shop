@@ -14,60 +14,28 @@
   />
 </div>
 
-<app-table
-  [columns]="tableColumns"
-  [data]="products"
-  [editingItem]="editingProduct"
-  (editChange)="onEditChange($event)"
->
+<app-table [columns]="tableColumns" [data]="products">
   <ng-template #actionsTemplate let-item>
-    <ng-container *ngIf="!editingProduct || editingProduct._id !== item._id">
-      <app-button
-        [config]="{
-          style: 'edit',
-          type: 'button',
-          size: 'small',
-          display: 'icon',
-          icon: 'edit'
-        }"
-        (onClick)="toggleEditProduct(item)"
-      />
-      <app-button
-        [config]="{
-          style: 'delete',
-          type: 'button',
-          size: 'small',
-          display: 'icon',
-          icon: 'delete'
-        }"
-        (onClick)="toggleConfirmDelete(item._id)"
-      />
-    </ng-container>
-
-    <ng-container
-      *ngIf="!isResponsive && editingProduct && editingProduct._id === item._id"
-    >
-      <app-button
-        [config]="{
-          style: 'save',
-          type: 'button',
-          size: 'small',
-          display: 'text',
-          text: 'Sauvegarder'
-        }"
-        (onClick)="updateProduct()"
-      />
-      <app-button
-        [config]="{
-          style: 'cancel',
-          type: 'button',
-          size: 'small',
-          display: 'text',
-          text: 'Annuler'
-        }"
-        (onClick)="toggleEditProduct()"
-      />
-    </ng-container>
+    <app-button
+      [config]="{
+        style: 'edit',
+        type: 'button',
+        size: 'small',
+        display: 'icon',
+        icon: 'edit'
+      }"
+      (onClick)="toggleEditProduct(item)"
+    />
+    <app-button
+      [config]="{
+        style: 'delete',
+        type: 'button',
+        size: 'small',
+        display: 'icon',
+        icon: 'delete'
+      }"
+      (onClick)="toggleConfirmDelete(item._id)"
+    />
   </ng-template>
 </app-table>
 

@@ -2,8 +2,11 @@
   <!-- Section Hero -->
   <section class="hero-section">
     <div class="hero-content">
-      <h1>Bienvenue sur Manage Shop</h1>
-      <p>Découvrez notre sélection de produits exceptionnels</p>
+      <h1 *ngIf="!userService.getUserFirstName()">Bienvenue sur Manage Shop</h1>
+      <h1 *ngIf="userService.getUserFirstName()">
+        Bienvenue {{ userService.getUserFirstName() }}
+      </h1>
+      <p>Découvrez notre sélection de produits</p>
 
       <!-- Barre de recherche -->
       <div class="search-section">
@@ -17,83 +20,75 @@
   <!-- Section principale -->
   <section class="main-content">
     <div class="container">
-      <div class="content-layout">
-        <!-- Sidebar avec filtres -->
-        <aside class="sidebar">
+      <!-- Filtre de catégories + Résultats -->
+      <div class="category-results-row">
+        <div class="category-filter-section">
           <app-category-filter
             [selectedCategory]="selectedCategory"
             (categoryChange)="onCategoryChange($event)"
           ></app-category-filter>
-        </aside>
-
-        <!-- Contenu principal -->
-        <main class="products-section">
-          <!-- En-tête avec résultats -->
-          <div class="results-header">
-            <h2>Nos Produits</h2>
-            <div class="results-info">
-              <span *ngIf="!loading">
-                {{ totalItems }} produit{{ totalItems > 1 ? "s" : "" }} trouvé{{
-                  totalItems > 1 ? "s" : ""
-                }}
-              </span>
-              <span
-                *ngIf="searchTerm || selectedCategory"
-                class="active-filters"
-              >
-                <span *ngIf="searchTerm">Recherche: "{{ searchTerm }}"</span>
-                <span *ngIf="selectedCategory">
-                  | Catégorie: {{ selectedCategory }}</span
-                >
-              </span>
-            </div>
-          </div>
-
-          <!-- État de chargement -->
-          <div *ngIf="loading" class="loading-state">
-            <div class="spinner"></div>
-            <p>Chargement des produits...</p>
-          </div>
-
-          <!-- Message d'erreur -->
-          <div *ngIf="error && !loading" class="error-state">
-            <p>{{ error }}</p>
-            <button (click)="loadProducts()" class="retry-btn">
-              Réessayer
-            </button>
-          </div>
-
-          <!-- Grille de produits -->
-          <div *ngIf="!loading && !error" class="products-grid">
-            <app-product-card
-              *ngFor="let product of products"
-              [product]="product"
-              (addToCart)="onAddToCart($event)"
-            ></app-product-card>
-          </div>
-
-          <!-- Message si aucun produit -->
-          <div
-            *ngIf="!loading && !error && products.length === 0"
-            class="no-products"
-          >
-            <p>Aucun produit trouvé</p>
-            <p *ngIf="searchTerm || selectedCategory">
-              Essayez de modifier vos critères de recherche
-            </p>
-          </div>
-
-          <!-- Pagination -->
-          <app-pagination
-            *ngIf="!loading && !error && totalPages > 1"
-            [currentPage]="currentPage"
-            [totalPages]="totalPages"
-            [totalItems]="totalItems"
-            [itemsPerPage]="itemsPerPage"
-            (pageChange)="onPageChange($event)"
-          ></app-pagination>
-        </main>
+        </div>
+        <div class="results-info" *ngIf="!loading">
+          <span>
+            {{ totalItems }} produit{{ totalItems > 1 ? "s" : "" }} trouvé{{
+              totalItems > 1 ? "s" : ""
+            }}
+          </span>
+          <span *ngIf="searchTerm || selectedCategory" class="active-filters">
+            <span *ngIf="searchTerm">Recherche: "{{ searchTerm }}"</span>
+            <span *ngIf="selectedCategory">
+              | Catégorie: {{ selectedCategory }}</span
+            >
+          </span>
+        </div>
       </div>
+
+      <!-- Contenu principal -->
+      <main class="products-section">
+        <!-- État de chargement -->
+        <div *ngIf="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Chargement des produits...</p>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div *ngIf="error && !loading" class="error-state">
+          <p>{{ error }}</p>
+          <button (click)="loadProducts()" class="main-btn retry-btn">
+            Réessayer
+          </button>
+        </div>
+
+        <!-- Grille de produits -->
+        <div *ngIf="!loading && !error" class="products-grid">
+          <app-product-card
+            *ngFor="let product of products"
+            [product]="product"
+            (addToCart)="onAddToCart($event)"
+          ></app-product-card>
+        </div>
+
+        <!-- Message si aucun produit -->
+        <div
+          *ngIf="!loading && !error && products.length === 0"
+          class="no-products"
+        >
+          <p>Aucun produit trouvé</p>
+          <p *ngIf="searchTerm || selectedCategory">
+            Essayez de modifier vos critères de recherche
+          </p>
+        </div>
+
+        <!-- Pagination -->
+        <app-pagination
+          *ngIf="!loading && !error && totalPages > 1"
+          [currentPage]="currentPage"
+          [totalPages]="totalPages"
+          [totalItems]="totalItems"
+          [itemsPerPage]="itemsPerPage"
+          (pageChange)="onPageChange($event)"
+        ></app-pagination>
+      </main>
     </div>
   </section>
 </div>

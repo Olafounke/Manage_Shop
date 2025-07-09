@@ -58,7 +58,7 @@
                 *ngFor="let category of product.categories"
                 class="category-tag"
               >
-                {{ category }}
+                {{ getCategoryName(category) }}
               </span>
             </div>
           </div>
@@ -88,39 +88,39 @@
                 type="number"
                 [value]="quantity"
                 (change)="onQuantityChange($event)"
+                [max]="product.totalInventory || 999"
                 min="1"
                 class="quantity-input"
               />
               <button
                 (click)="increaseQuantity()"
                 class="quantity-btn"
+                [disabled]="
+                  product.totalInventory && quantity >= product.totalInventory
+                "
                 type="button"
               >
                 +
               </button>
             </div>
+
+            <!-- Message d'erreur de stock -->
+            <div *ngIf="stockError" class="stock-error">
+              {{ stockError }}
+            </div>
+          </div>
+
+          <!-- Message de succès -->
+          <div *ngIf="successMessage" class="success-message">
+            {{ successMessage }}
           </div>
 
           <!-- Bouton d'ajout au panier -->
           <div class="add-to-cart-section">
-            <button (click)="addToCart()" class="add-to-cart-btn" type="button">
-              <span class="cart-icon">🛒</span>
-              Ajouter au panier ({{ quantity }})
-            </button>
-          </div>
-
-          <!-- Informations supplémentaires -->
-          <div class="product-meta">
-            <div class="meta-item">
-              <span class="meta-label">Référence:</span>
-              <span class="meta-value">{{ product._id }}</span>
-            </div>
-            <div class="meta-item" *ngIf="product.createdAt">
-              <span class="meta-label">Ajouté le:</span>
-              <span class="meta-value">{{
-                product.createdAt | date : "dd/MM/yyyy"
-              }}</span>
-            </div>
+            <app-button
+              [config]="addToCartButtonConfig"
+              (onClick)="onAddToCartClick()"
+            ></app-button>
           </div>
         </div>
       </div>

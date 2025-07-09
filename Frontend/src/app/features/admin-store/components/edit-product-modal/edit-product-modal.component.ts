@@ -1,14 +1,23 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { Product } from '../../../../core/models/product.interface';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ButtonConfig } from '../../../../core/models/button.interface';
+import { ImageService } from '../../../../core/services/image.service';
 
 @Component({
   selector: 'app-edit-product-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    ModalComponent,
+    ButtonComponent,
+  ],
   templateUrl: './edit-product-modal.component.html',
   styleUrls: ['./edit-product-modal.component.scss'],
 })
@@ -19,11 +28,75 @@ export class EditProductModalComponent {
   editingModalProduct: Product | null = null;
   showEditModal = false;
   selectedCategories: string[] = [];
+  selectedFiles: File[] = [];
+  uploadedImages: string[] = [];
+  isUploading = false;
+
+  // Configuration du bouton d'upload
+  uploadButtonConfig: ButtonConfig = {
+    style: 'save',
+    type: 'button',
+    size: 'medium',
+    display: 'icon+text',
+    text: 'Enregistrer des images',
+    icon: 'cloud_upload',
+    disabled: false,
+  };
+
+  constructor(private imageService: ImageService) {}
+
+  onFileSelected(event: any): void {
+    const files = event.target.files;
+    if (files) {
+      this.selectedFiles = Array.from(files);
+      this.updateUploadButtonConfig();
+    }
+  }
+
+  async uploadImages(): Promise<void> {
+    if (this.selectedFiles.length === 0) return;
+
+    this.isUploading = true;
+    this.updateUploadButtonConfig();
+
+    try {
+      const response = await this.imageService
+        .uploadMultipleImages(this.selectedFiles)
+        .toPromise();
+      const newImages = response?.urls || [];
+      this.uploadedImages = [...this.uploadedImages, ...newImages];
+      if (this.editingModalProduct) {
+        this.editingModalProduct.images = this.uploadedImages;
+      }
+      this.selectedFiles = []; // Vider les fichiers sélectionnés après upload
+      this.updateUploadButtonConfig();
+    } catch (error) {
+      console.error("Erreur lors de l'upload des images:", error);
+    } finally {
+      this.isUploading = false;
+      this.updateUploadButtonConfig();
+    }
+  }
+
+  removeImage(index: number): void {
+    const imageUrl = this.uploadedImages[index];
+    this.imageService.deleteImage(imageUrl).subscribe({
+      next: () => {
+        this.uploadedImages.splice(index, 1);
+        if (this.editingModalProduct) {
+          this.editingModalProduct.images = this.uploadedImages;
+        }
+      },
+      error: (err) =>
+        console.error("Erreur lors de la suppression de l'image:", err),
+    });
+  }
 
   updateProductHandler(): void {
     if (this.editingModalProduct) {
       // Ajouter les catégories sélectionnées
       this.editingModalProduct.categories = [...this.selectedCategories];
+      this.editingModalProduct.images = this.uploadedImages;
     }
     this.updateProduct.emit(this.editingModalProduct!);
   }
@@ -36,10 +109,15 @@ export class EditProductModalComponent {
       this.selectedCategories = product.categories
         ? [...product.categories]
         : [];
+      // Initialiser les images
+      this.uploadedImages = product.images ? [...product.images] : [];
     } else {
       this.editingModalProduct = null;
       this.selectedCategories = [];
+      this.selectedFiles = [];
+      this.uploadedImages = [];
     }
+    this.updateUploadButtonConfig();
   }
 
   onCategoryChange(category: string, isChecked: boolean): void {
@@ -59,5 +137,21 @@ export class EditProductModalComponent {
 
   isCategorySelected(category: string): boolean {
     return this.selectedCategories.includes(category);
+  }
+
+  private updateUploadButtonConfig(): void {
+    this.uploadButtonConfig = {
+      ...this.uploadButtonConfig,
+      text: this.isUploading
+        ? 'Enregistrement en cours...'
+        : this.selectedFiles.length > 0
+        ? `Enregistrer ${this.selectedFiles.length} image(s)`
+        : 'Enregistrer des images',
+      disabled: this.selectedFiles.length === 0 || this.isUploading,
+    };
+  }
+
+  onUploadClick(): void {
+    this.uploadImages();
   }
 }

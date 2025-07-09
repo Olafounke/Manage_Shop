@@ -1,1 +1,81 @@
-<p>orders works!</p>
+<div class="orders-management-header">
+  <h1>Gestion des commandes</h1>
+</div>
+
+<!-- Commandes validées (en attente de préparation) -->
+<div class="orders-section" *ngIf="validatedOrders.length > 0">
+  <h2>Commandes validées</h2>
+  <app-table [columns]="commonColumns" [data]="validatedOrders">
+    <ng-template #actionsTemplate let-item>
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'icon+text',
+          text: 'Préparer',
+          icon: 'check'
+        }"
+        (onClick)="prepareOrder(item._id)"
+      />
+    </ng-template>
+  </app-table>
+</div>
+
+<!-- Commandes préparées (en attente d'expédition) -->
+<div class="orders-section" *ngIf="preparedOrders.length > 0">
+  <h2>Commandes préparées</h2>
+  <app-table [columns]="commonColumns" [data]="preparedOrders">
+    <ng-template #actionsTemplate let-item>
+      <app-button
+        [config]="{
+          style: 'save',
+          type: 'button',
+          size: 'small',
+          display: 'icon+text',
+          text: 'Expédier',
+          icon: 'local_shipping'
+        }"
+        (onClick)="shipOrder(item._id)"
+      />
+    </ng-template>
+  </app-table>
+</div>
+
+<!-- Commandes expédiées (livrées) -->
+<div class="orders-section" *ngIf="shippedOrders.length > 0">
+  <h2>Commandes expédiées</h2>
+  <app-table [columns]="commonColumns" [data]="shippedOrders">
+    <ng-template #actionsTemplate let-item>
+      <app-button
+        [config]="{
+          style: 'default',
+          type: 'button',
+          size: 'small',
+          display: 'icon+text',
+          text: 'Détails',
+          icon: 'visibility'
+        }"
+        (onClick)="viewOrderDetails(item._id)"
+      />
+    </ng-template>
+  </app-table>
+</div>
+
+<!-- Message si aucune commande -->
+<div
+  class="no-orders"
+  *ngIf="
+    !loading &&
+    validatedOrders.length === 0 &&
+    preparedOrders.length === 0 &&
+    shippedOrders.length === 0
+  "
+>
+  <p>Aucune commande à traiter</p>
+</div>
+
+<!-- Message d'erreur -->
+<div class="error-message" *ngIf="error">
+  <p>{{ error }}</p>
+</div>

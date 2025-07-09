@@ -39,15 +39,52 @@
     </div>
 
     <div class="form-group">
-      <label for="edit-productStock">Stock</label>
-      <input
-        type="number"
-        id="edit-productStock"
-        [(ngModel)]="editingModalProduct.totalInventory"
-        name="productStock"
-        min="0"
-        required
-      />
+      <label>Images</label>
+      <div class="image-upload-section">
+        <div class="file-input-container">
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            class="file-input"
+            id="editFileInput"
+          />
+          <label for="editFileInput" class="file-input-label">
+            <mat-icon>photo_library</mat-icon>
+            <span>Sélectionner des images</span>
+          </label>
+        </div>
+
+        <div *ngIf="selectedFiles.length > 0" class="selected-files">
+          <p>{{ selectedFiles.length }} fichier(s) sélectionné(s) :</p>
+          <ul>
+            <li *ngFor="let file of selectedFiles">{{ file.name }}</li>
+          </ul>
+        </div>
+
+        <app-button
+          [config]="uploadButtonConfig"
+          (onClick)="onUploadClick()"
+        ></app-button>
+      </div>
+
+      <!-- Aperçu des images existantes et uploadées -->
+      <div class="image-preview" *ngIf="uploadedImages.length > 0">
+        <div
+          class="image-item"
+          *ngFor="let image of uploadedImages; let i = index"
+        >
+          <img [src]="image" [alt]="'Image ' + (i + 1)" />
+          <button
+            type="button"
+            (click)="removeImage(i)"
+            class="remove-image-btn"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">

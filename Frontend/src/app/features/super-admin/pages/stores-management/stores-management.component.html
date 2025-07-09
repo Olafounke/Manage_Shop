@@ -75,7 +75,11 @@
   </ng-template>
 </app-table>
 
-<app-add-store-modal [users]="users" (refreshStores)="getAllStores()" />
+<app-add-store-modal
+  [users]="users"
+  (refreshStores)="onStoreCreated()"
+  (storeCreationStart)="onStoreCreationStart($event)"
+/>
 
 <app-edit-store-modal [users]="users" (updateStore)="updateStore($event)" />
 

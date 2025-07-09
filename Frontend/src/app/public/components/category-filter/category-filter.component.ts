@@ -17,6 +17,8 @@ export class CategoryFilterComponent implements OnInit {
   categories: string[] = [];
   loading: boolean = false;
 
+  dropdownOpen = false;
+
   constructor(private categoryService: CategoryService) {}
 
   ngOnInit(): void {
@@ -45,5 +47,15 @@ export class CategoryFilterComponent implements OnInit {
   clearFilter(): void {
     this.selectedCategory = '';
     this.categoryChange.emit('');
+    this.dropdownOpen = false;
+  }
+
+  toggleDropdown(): void {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectAndClose(category: string): void {
+    this.onCategoryChange(category);
+    this.dropdownOpen = false;
   }
 }
