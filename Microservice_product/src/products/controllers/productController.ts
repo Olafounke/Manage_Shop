@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { ProductService } from "../services/productService";
+import { ImageService } from "../services/imageService";
+import upload from "../../middleware/uploadMiddleware";
 
 interface AuthRequest extends Request {
   user?: { userId: string; role: string; store: string };
@@ -176,6 +178,55 @@ export class ProductController {
     } catch (err: any) {
       console.error("Erreur removeStoreFromAllProducts:", err);
       res.status(500).json({ error: "Erreur lors de la suppression du store des produits." });
+    }
+  }
+
+  public async uploadImage(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.file) {
+        res.status(400).json({ error: "Aucun fichier fourni" });
+        return;
+      }
+
+      const imageUrl = await ImageService.uploadImage(req.file);
+      res.json({ url: imageUrl });
+    } catch (error: any) {
+      console.error("Erreur lors de l'upload de l'image:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  public async deleteImage(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { imageUrl } = req.body;
+
+      if (!imageUrl) {
+        res.status(400).json({ error: "URL de l'image manquante" });
+        return;
+      }
+
+      await ImageService.deleteImage(imageUrl);
+      res.json({ message: "Image supprimée avec succès" });
+    } catch (error: any) {
+      console.error("Erreur lors de la suppression de l'image:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  public async uploadMultipleImages(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.files || req.files.length === 0) {
+        res.status(400).json({ error: "Aucun fichier fourni" });
+        return;
+      }
+
+      const uploadPromises = (req.files as Express.Multer.File[]).map((file) => ImageService.uploadImage(file));
+
+      const imageUrls = await Promise.all(uploadPromises);
+      res.json({ urls: imageUrls });
+    } catch (error: any) {
+      console.error("Erreur lors de l'upload des images:", error);
+      res.status(500).json({ error: error.message });
     }
   }
 }

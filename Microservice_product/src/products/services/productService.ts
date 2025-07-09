@@ -13,11 +13,20 @@ export class ProductService {
       .limit(limit)
       .sort({ createdAt: -1 });
 
+    // Convertir les objets catégories en noms de catégories
+    const productsWithCategoryNames = products.map((product) => {
+      const productObj = product.toObject();
+      if (productObj.categories && Array.isArray(productObj.categories)) {
+        productObj.categories = productObj.categories.map((cat: any) => cat.name);
+      }
+      return productObj;
+    });
+
     const total = await Product.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
     return {
-      products,
+      products: productsWithCategoryNames,
       total,
       page,
       limit,
@@ -41,7 +50,16 @@ export class ProductService {
     console.log("[ProductService-MS] Produits trouvés:", products);
     console.log("[ProductService-MS] Nombre de produits:", products.length);
 
-    return products;
+    // Convertir les objets catégories en noms de catégories
+    const productsWithCategoryNames = products.map((product) => {
+      const productObj = product.toObject();
+      if (productObj.categories && Array.isArray(productObj.categories)) {
+        productObj.categories = productObj.categories.map((cat: any) => cat.name);
+      }
+      return productObj;
+    });
+
+    return productsWithCategoryNames;
   }
 
   static async getProductById(id: string) {
@@ -49,7 +67,13 @@ export class ProductService {
     if (!product) {
       throw new Error("Produit non trouvé.");
     }
-    return product;
+
+    // Convertir les objets catégories en noms de catégories
+    const productObj = product.toObject();
+    if (productObj.categories && Array.isArray(productObj.categories)) {
+      productObj.categories = productObj.categories.map((cat: any) => cat.name);
+    }
+    return productObj;
   }
 
   static async createProduct(productData: any, userId: string) {
@@ -67,12 +91,39 @@ export class ProductService {
       throw new Error("Le prix doit être un nombre positif.");
     }
 
+    // Convertir les noms de catégories en ObjectId
+    let categoryObjectIds: mongoose.Types.ObjectId[] = [];
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      try {
+        // Récupérer toutes les catégories actives
+        const allCategories = await CategoryService.getAllCategories();
+
+        // Créer un map pour une recherche rapide
+        const categoryMap = new Map(allCategories.map((cat) => [cat.name, cat._id]));
+
+        // Convertir les noms en ObjectId
+        categoryObjectIds = categories
+          .map((categoryName) => {
+            const categoryId = categoryMap.get(categoryName);
+            if (!categoryId) {
+              console.warn(`Catégorie non trouvée: ${categoryName}`);
+              return null;
+            }
+            return categoryId;
+          })
+          .filter((id) => id !== null) as mongoose.Types.ObjectId[];
+      } catch (error) {
+        console.error("Erreur lors de la conversion des catégories:", error);
+        throw new Error("Erreur lors du traitement des catégories.");
+      }
+    }
+
     const product = new Product({
       name,
       price,
       description,
       images,
-      categories,
+      categories: categoryObjectIds,
       customFields,
       owner: new mongoose.Types.ObjectId(userId),
       stores: storeId ? [storeId] : [],
@@ -110,6 +161,34 @@ export class ProductService {
     delete productData.stores;
     delete productData.totalInventory;
     delete productData.inStock;
+
+    // Traiter les catégories si elles sont présentes
+    if (productData.categories && Array.isArray(productData.categories)) {
+      try {
+        // Récupérer toutes les catégories actives
+        const allCategories = await CategoryService.getAllCategories();
+
+        // Créer un map pour une recherche rapide
+        const categoryMap = new Map(allCategories.map((cat) => [cat.name, cat._id]));
+
+        // Convertir les noms en ObjectId
+        const categoryObjectIds = productData.categories
+          .map((categoryName: string) => {
+            const categoryId = categoryMap.get(categoryName);
+            if (!categoryId) {
+              console.warn(`Catégorie non trouvée: ${categoryName}`);
+              return null;
+            }
+            return categoryId;
+          })
+          .filter((id: mongoose.Types.ObjectId | null) => id !== null) as mongoose.Types.ObjectId[];
+
+        productData.categories = categoryObjectIds;
+      } catch (error) {
+        console.error("Erreur lors de la conversion des catégories:", error);
+        throw new Error("Erreur lors du traitement des catégories.");
+      }
+    }
 
     Object.assign(product, productData);
     return await product.save();
@@ -250,7 +329,8 @@ export class ProductService {
     }
 
     if (category) {
-      const categoryDoc = await CategoryService.getCategoryBySlug(category);
+      // Chercher la catégorie par nom au lieu du slug
+      const categoryDoc = await CategoryService.getCategoryByName(category);
       if (categoryDoc) {
         query.categories = categoryDoc._id;
       }

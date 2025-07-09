@@ -9,7 +9,7 @@ import { extractUserFromHeader } from "./products/middleware/userExtractor";
 
 const app: Express = express();
 
-app.use(express.json());
+app.use(express.json({ type: ["application/json", "text/plain"] }));
 
 app.use(
   cors({

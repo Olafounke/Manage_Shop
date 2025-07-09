@@ -14,6 +14,10 @@ export class CategoryService {
     return await Category.findOne({ slug, isActive: true });
   }
 
+  static async getCategoryByName(name: string): Promise<ICategory | null> {
+    return await Category.findOne({ name, isActive: true });
+  }
+
   static async createCategory(categoryData: Partial<ICategory>): Promise<ICategory> {
     if (!categoryData.name) {
       throw new Error("Le nom de la catégorie est requis.");
