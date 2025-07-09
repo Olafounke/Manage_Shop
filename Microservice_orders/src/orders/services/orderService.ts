@@ -11,6 +11,22 @@ export class OrderService {
     return await OrderGroup.find({ user: userId }).populate("orders").sort({ createdAt: -1 });
   }
 
+  static async getOrderById(id: string): Promise<IOrder> {
+    const order = await Order.findById(id).populate("orderGroup");
+    if (!order) {
+      throw new Error("Order not found");
+    }
+    return order;
+  }
+
+  static async getOrderGroupById(id: string): Promise<IOrderGroup> {
+    const orderGroup = await OrderGroup.findById(id).populate("orders");
+    if (!orderGroup) {
+      throw new Error("OrderGroup not found");
+    }
+    return orderGroup;
+  }
+
   static async getStoreOrders(storeId: string): Promise<IOrder[]> {
     return await Order.find({ storeId: storeId }).populate("orderGroup").sort({ createdAt: -1 });
   }

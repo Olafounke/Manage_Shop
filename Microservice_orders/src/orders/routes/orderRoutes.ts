@@ -4,6 +4,8 @@ import { orderController } from "../controllers/orderController";
 const router = Router();
 
 router.get("/", orderController.getUserOrders);
+router.get("/:id/order", orderController.getOrderById);
+router.get("/:id/groupOrder", orderController.getOrderGroupById);
 router.get("/admin", orderController.getStoreOrders);
 router.put("/:id/status", orderController.updateOrderStatus);
 

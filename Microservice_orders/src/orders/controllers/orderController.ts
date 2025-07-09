@@ -16,6 +16,26 @@ export class OrderController {
     }
   }
 
+  public async getOrderById(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const order = await OrderService.getOrderById(id);
+      res.json(order);
+    } catch (error: any) {
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+  }
+
+  public async getOrderGroupById(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const orderGroup = await OrderService.getOrderGroupById(id);
+      res.json(orderGroup);
+    } catch (error: any) {
+      res.status(500).json({ message: "Erreur serveur", error: error.message });
+    }
+  }
+
   public async getStoreOrders(req: AuthRequest, res: Response): Promise<void> {
     try {
       const storeId = req.user!.store;
