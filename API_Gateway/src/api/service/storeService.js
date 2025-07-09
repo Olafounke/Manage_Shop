@@ -128,7 +128,6 @@ class StoreService {
           throw new Error("Un store avec ce nom existe déjà");
         }
         body.storeName = storeName;
-        body.storeNameSlug = storeNameSlug;
       }
 
       if (storeAddress) {
@@ -156,7 +155,7 @@ class StoreService {
         null,
         null,
         port,
-        store.storeNameSlug
+        store.nameSlug
       );
 
       if (result) {

@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const tokenService = require("./tokenService");
 const { BCRYPT_ROUNDS } = require("../../config/environment");
+const StoreService = require("../../api/service/storeService");
 
 class AuthService {
   async register(userData, req) {
@@ -58,7 +59,29 @@ class AuthService {
   async getAllUsers() {
     try {
       const users = await User.find({}).select("email firstName lastName _id role store createdAt updatedAt");
-      return users;
+      console.log("users", users);
+      const enrichedUsers = await Promise.all(
+        users.map(async (user) => {
+          const userObj = user.toObject();
+          console.log("userObj", userObj);
+          if (userObj.store) {
+            try {
+              const storeData = await StoreService.getStoreById(userObj.store);
+              userObj.storeName = storeData.name;
+            } catch (storeError) {
+              console.warn(`Impossible de récupérer les données du store ${userObj.store}:`, storeError.message);
+              userObj.storeName = null;
+            }
+          } else {
+            userObj.storeName = null;
+          }
+
+          return userObj;
+        })
+      );
+
+      console.log("enrichedUsers", enrichedUsers);
+      return enrichedUsers;
     } catch (error) {
       throw new Error(`Erreur lors de la récupération des utilisateurs: ${error.message}`);
     }

@@ -17,11 +17,15 @@ class ProductController {
         req.query
       );
 
-      const enrichedProducts = await ProductInventoryService.enrichProductsWithInventory(result.products);
+      const enrichedResult = await ProductInventoryService.enrichProductsWithInventoryAndUpdatePagination(
+        result.products,
+        result
+      );
+      const productsWithStoreNames = await ProductService.enrichProductsWithStoreNames(enrichedResult.products);
 
       res.json({
-        ...result,
-        products: enrichedProducts,
+        ...enrichedResult,
+        products: productsWithStoreNames,
       });
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
@@ -40,8 +44,9 @@ class ProductController {
       );
 
       const enrichedProducts = await ProductInventoryService.enrichProductsWithInventory(result);
+      const productsWithStoreNames = await ProductService.enrichProductsWithStoreNames(enrichedProducts);
 
-      res.json(enrichedProducts);
+      res.json(productsWithStoreNames);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
     }
@@ -213,6 +218,52 @@ class ProductController {
         id: req.params.id,
       });
       const result = await ProxyService.forwardRequest("products", endpoint, "DELETE", null, {}, req.user);
+      res.json(result);
+    } catch (error) {
+      res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  static async uploadImage(req, res) {
+    try {
+      const result = await ProxyService.forwardFileUpload(
+        "products",
+        products.endpoints.uploadImage,
+        req,
+        res,
+        req.user
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  static async uploadMultipleImages(req, res) {
+    try {
+      const result = await ProxyService.forwardFileUpload(
+        "products",
+        products.endpoints.uploadImages,
+        req,
+        res,
+        req.user
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  static async deleteImage(req, res) {
+    try {
+      const result = await ProxyService.forwardRequest(
+        "products",
+        products.endpoints.deleteImage,
+        "DELETE",
+        req.body,
+        {},
+        req.user
+      );
       res.json(result);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });

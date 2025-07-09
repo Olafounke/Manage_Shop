@@ -14,11 +14,30 @@ class ProductInventoryService {
   }
 
   static async enrichProductsWithInventory(products) {
-    return await Promise.all(
+    const enrichedProducts = await Promise.all(
       products.map(async (product) => {
         return await this.enrichProductWithInventory(product);
       })
     );
+
+    return enrichedProducts.filter((product) => product.inStock === true);
+  }
+
+  static async enrichProductsWithInventoryAndUpdatePagination(products, paginationData) {
+    const enrichedProducts = await this.enrichProductsWithInventory(products);
+
+    const filteredTotal = enrichedProducts.length;
+    const limit = paginationData.limit;
+    const currentPage = paginationData.page;
+    const recalculatedTotalPages = Math.ceil(filteredTotal / limit);
+
+    return {
+      products: enrichedProducts,
+      total: filteredTotal,
+      page: currentPage,
+      limit: limit,
+      totalPages: recalculatedTotalPages,
+    };
   }
 
   static async getProductTotalInventory(productId, storeIds = []) {

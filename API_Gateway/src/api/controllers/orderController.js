@@ -14,6 +14,26 @@ class OrderController {
     }
   }
 
+  static async getOrderById(req, res) {
+    try {
+      const endpoint = ProxyService.buildEndpoint(orders.endpoints.getOrderById, { id: req.params.id });
+      const result = await ProxyService.forwardRequest("orders", endpoint, "GET");
+      res.json(result);
+    } catch (error) {
+      res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
+  static async getOrderGroupById(req, res) {
+    try {
+      const endpoint = ProxyService.buildEndpoint(orders.endpoints.getOrderGroupById, { id: req.params.id });
+      const result = await ProxyService.forwardRequest("orders", endpoint, "GET");
+      res.json(result);
+    } catch (error) {
+      res.status(error.status || 500).json({ error: error.message });
+    }
+  }
+
   static async getStoreOrders(req, res) {
     try {
       const result = await ProxyService.forwardRequest(
@@ -68,7 +88,6 @@ class OrderController {
         {},
         req.user
       );
-      console.log("result", result);
 
       res.json(result);
     } catch (error) {

@@ -32,7 +32,7 @@ class StoreController {
 
   static async createStore(req, res) {
     try {
-      const { storeName, storeAddress, userId } = req.body;
+      let { storeName, storeAddress, userId } = req.body;
 
       if (!storeName || !storeAddress) {
         return res.status(400).json({
@@ -40,6 +40,9 @@ class StoreController {
         });
       }
 
+      if (!userId) {
+        userId = null;
+      }
       const result = await StoreService.createStore(storeName, storeAddress, userId);
 
       if (result.success) {
@@ -65,7 +68,11 @@ class StoreController {
   static async updateStoreById(req, res) {
     try {
       const storeId = req.params.storeId;
-      const { storeName, storeAddress, userId } = req.body;
+      let { storeName, storeAddress, userId } = req.body;
+      console.log("userId", userId);
+      if (!userId) {
+        userId = null;
+      }
       const result = await StoreService.updateStoreById(storeId, storeName, storeAddress, userId);
       res.json(result);
     } catch (error) {

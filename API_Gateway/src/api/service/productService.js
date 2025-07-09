@@ -25,6 +25,30 @@ class ProductService {
       console.error(`Erreur lors de la suppression du store ${storeId} des produits:`, error);
     }
   }
+  static async enrichProductsWithStoreNames(products) {
+    // On récupère tous les storeIds uniques
+    const allStoreIds = Array.from(new Set(products.flatMap((p) => (Array.isArray(p.stores) ? p.stores : []))));
+    // On fait les requêtes en parallèle
+    const storeIdToName = {};
+    await Promise.all(
+      allStoreIds.map(async (storeId) => {
+        try {
+          const StoreService = require("../service/storeService");
+          const store = await StoreService.getStoreById(storeId);
+          storeIdToName[storeId] = store && store.name ? store.name : "";
+        } catch (e) {
+          storeIdToName[storeId] = "";
+        }
+      })
+    );
+    // On remplace dans chaque produit
+    return products.map((p) => ({
+      ...p,
+      stores: Array.isArray(p.stores)
+        ? p.stores.map((storeId) => ({ id: storeId, name: storeIdToName[storeId] || "" }))
+        : [],
+    }));
+  }
 }
 
 module.exports = ProductService;

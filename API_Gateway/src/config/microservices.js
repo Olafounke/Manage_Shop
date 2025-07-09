@@ -24,6 +24,9 @@ module.exports = {
       categoryCreate: "/categories",
       categoryUpdate: "/categories/:id",
       categoryDelete: "/categories/:id",
+      uploadImage: "/products/upload-image",
+      uploadImages: "/products/upload-images",
+      deleteImage: "/products/delete-image",
     },
   },
   carts: {
@@ -40,6 +43,8 @@ module.exports = {
     url: ORDER_SERVICE_URL,
     endpoints: {
       list: "/orders",
+      getOrderById: "/orders/:id/order",
+      getOrderGroupById: "/orders/:id/groupOrder",
       storeOrders: "/orders/admin",
       createCheckout: "/orders/checkout",
       updateStatus: "/orders/:id/status",
