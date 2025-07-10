@@ -6,7 +6,13 @@ export class CartService {
     return await Cart.findOne({ owner: userId });
   }
 
-  static async addToCart(userId: string, productId: string, quantity: number, price: number): Promise<ICart> {
+  static async addToCart(
+    userId: string,
+    productId: string,
+    productName: string,
+    quantity: number,
+    price: number
+  ): Promise<ICart> {
     try {
       let cart = await Cart.findOne({ owner: userId });
 
@@ -16,6 +22,7 @@ export class CartService {
           items: [
             {
               product: new mongoose.Types.ObjectId(productId),
+              productName,
               quantity,
               price,
             },
@@ -29,6 +36,7 @@ export class CartService {
         } else {
           cart.items.push({
             product: new mongoose.Types.ObjectId(productId),
+            productName,
             quantity,
             price,
           });

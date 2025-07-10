@@ -23,14 +23,14 @@ export class CartController {
   public async addToCart(req: AuthRequest, res: Response): Promise<void> {
     try {
       const userId = req.user!.userId;
-      const { productId, quantity, price } = req.body;
+      const { productId, productName, quantity, price } = req.body;
 
       if (!productId || !quantity || quantity <= 0) {
         res.status(400).json({ message: "productId, price et quantity supérieur à 0 requis" });
         return;
       }
 
-      const cart = await CartService.addToCart(userId, productId, quantity, price);
+      const cart = await CartService.addToCart(userId, productId, productName, quantity, price);
       res.status(201).json(cart);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
