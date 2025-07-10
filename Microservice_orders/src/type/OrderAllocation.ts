@@ -1,5 +1,7 @@
 export interface EnrichedCart {
   owner: string;
+  userName: string;
+  userEmail: string;
   userAdress: {
     fullAddress: string;
     longitude: number;

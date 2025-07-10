@@ -135,6 +135,8 @@ export class OrderService {
       const totalAmount = allocations.reduce((sum, alloc) => sum + alloc.subtotal, 0);
       const orderGroup = new OrderGroup({
         user: userId,
+        userName: cart.userName,
+        userEmail: cart.userEmail,
         userAddress: {
           fullAddress: cart.userAdress.fullAddress,
           longitude: cart.userAdress.longitude,

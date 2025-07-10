@@ -3,6 +3,8 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IOrderGroup extends Document {
   _id: mongoose.Types.ObjectId;
   user: mongoose.Types.ObjectId;
+  userName: string;
+  userEmail: string;
   userAddress: {
     fullAddress: string;
     longitude: number;
@@ -18,6 +20,8 @@ export interface IOrderGroup extends Document {
 const orderGroupSchema = new Schema<IOrderGroup>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userName: { type: String, required: true },
+    userEmail: { type: String, required: true },
     userAddress: {
       fullAddress: { type: String, required: true },
       longitude: { type: Number, required: true },
