@@ -1,4 +1,4 @@
-﻿# Generated: 2025-07-09 20:04:53
+﻿# Generated: 2025-07-10 22:45:40
 services:
 
   ms_store_magasin-2:
@@ -73,7 +73,7 @@ services:
       - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
       - STORE_LONGITUDE=3.8728999
       - STORE_LATITUDE=43.5628201
-      - USER_ID=68529fe2adb7774707fbb198
+      - USER_ID=
       - PORT=8004
       - POSTGRES_HOST=ms-postgres-db
       - POSTGRES_PORT=5432
