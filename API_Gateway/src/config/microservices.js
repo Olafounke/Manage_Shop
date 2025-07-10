@@ -69,6 +69,7 @@ module.exports = {
     endpoints: {
       create: "/transfert",
       getByStore: "/transfert/store/:storeId",
+      getById: "/transfert/:id",
       accept: "/transfert/:id/accept",
       reject: "/transfert/:id/reject",
     },

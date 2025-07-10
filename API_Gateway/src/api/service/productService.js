@@ -13,9 +13,22 @@ class ProductService {
       throw new Error("Erreur lors de la récupération du produit");
     }
   }
+
+  static async addStoreToProduct(productId, storeId) {
+    try {
+      const endpoint = ProxyService.buildEndpoint(products.endpoints.addStore, { id: productId });
+      const result = await ProxyService.forwardRequest("products", endpoint, "POST", { storeId });
+
+      return result;
+    } catch (error) {
+      console.error(`Erreur lors de l'ajout du store ${storeId} au produit ${productId}:`, error);
+      throw new Error(`Impossible d'ajouter le store au produit: ${error.message}`);
+    }
+  }
+
   static async removeStoreFromProducts(storeId) {
     try {
-      const endpoint = ProxyService.buildEndpoint(microservices.products.endpoints.removeStoreFromAll, {
+      const endpoint = ProxyService.buildEndpoint(products.endpoints.removeStoreFromAll, {
         storeId,
       });
       const result = await ProxyService.forwardRequest("products", endpoint, "DELETE", null, {}, null);

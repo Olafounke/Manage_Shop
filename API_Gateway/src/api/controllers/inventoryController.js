@@ -48,8 +48,7 @@ class InventoryController {
     try {
       const storeId = req.params.storeId;
       const itemId = req.params.id;
-      const { quantity } = req.body;
-      const result = await InventoryService.updateInventoryItem(storeId, itemId, quantity);
+      const result = await InventoryService.updateInventoryItem(storeId, itemId, req.body);
       res.json(result);
     } catch (error) {
       console.error(

@@ -11,6 +11,9 @@ class OrderService {
       const fullAddress = `${userAddress.street}, ${userAddress.city}, ${userAddress.postalCode}, ${userAddress.country}`;
       const userCoordinates = await GeolocationService.geocodeAddress(fullAddress);
 
+      const AuthService = require("../../auth/services/authService");
+      const user = await AuthService.getCurrentUser(userId);
+
       const enrichedItems = [];
       const storeDataMap = new Map();
 
@@ -74,6 +77,8 @@ class OrderService {
 
       return {
         owner: userId,
+        userName: user.firstName + " " + user.lastName,
+        userEmail: user.email,
         userAdress: {
           fullAddress: fullAddress,
           longitude: userCoordinates.longitude,
@@ -98,6 +103,25 @@ class OrderService {
       return result;
     } catch (error) {
       console.error(`Erreur lors de l'annulation des commandes pour le store ${storeId}:`, error);
+    }
+  }
+
+  static async enrichOrderWithStoreName(orderGroup) {
+    try {
+      const StoreService = require("./storeService");
+      for (const order of orderGroup.orders) {
+        try {
+          const storeData = await StoreService.getStoreById(order.storeId);
+          order.storeName = storeData.name;
+        } catch (storeError) {
+          console.warn(`Impossible de récupérer les données du store ${order.storeId}:`, storeError.message);
+          order.storeName = "Magasin inconnu";
+        }
+      }
+      return orderGroup;
+    } catch (error) {
+      console.error("Erreur lors de l'enrichissement des commandes avec les noms de magasins:", error);
+      throw new Error(`Impossible d'enrichir les commandes: ${error.message}`);
     }
   }
 }

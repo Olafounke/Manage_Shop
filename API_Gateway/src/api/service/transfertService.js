@@ -42,8 +42,15 @@ class TransfertService {
     }
   }
 
+  static async getTransfertById(transfertId) {
+    const endpoint = ProxyService.buildEndpoint(transferts.endpoints.getById, { id: transfertId });
+    const result = await ProxyService.forwardRequest("transferts", endpoint, "GET");
+    return result;
+  }
+
   static async acceptTransfert(transfertId, user) {
     try {
+      const transfertData = await this.getTransfertById(transfertId);
       const availableStock = await InventoryService.getInventoryItemById(
         transfertData.fromStoreId,
         transfertData.productId
@@ -55,12 +62,14 @@ class TransfertService {
 
       const endpoint = ProxyService.buildEndpoint(transferts.endpoints.accept, { id: transfertId });
       const result = await ProxyService.forwardRequest("transferts", endpoint, "PUT", null, {}, user);
-
+      console.log("result", result);
+      console.log("transfertData", transfertData);
       if (result.success) {
         try {
           await InventoryService.incrementInventoryItem(
             transfertData.toStoreId,
             transfertData.productId,
+            transfertData.productName,
             transfertData.quantity
           );
           await InventoryService.decrementInventoryItem(

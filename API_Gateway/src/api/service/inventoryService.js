@@ -150,11 +150,35 @@ class InventoryService {
     }
   }
 
-  static async incrementInventoryItem(storeId, itemId, quantity) {
-    return this.updateInventoryItem(storeId, itemId, {
-      operation: "increment",
-      quantity: quantity,
-    });
+  static async incrementInventoryItem(storeId, itemId, productName, quantity) {
+    try {
+      await this.getInventoryItemById(storeId, itemId);
+
+      return this.updateInventoryItem(storeId, itemId, {
+        operation: "increment",
+        quantity: quantity,
+      });
+    } catch (error) {
+      console.log(
+        `L'item ${itemId} n'existe pas dans l'inventaire du store ${storeId}, création d'un nouvel item avec quantité ${quantity}`
+      );
+
+      const inventoryResult = await this.createInventoryItem(storeId, {
+        productId: itemId,
+        productName: productName,
+        quantity: quantity,
+      });
+
+      try {
+        const ProductService = require("./productService");
+        await ProductService.addStoreToProduct(itemId, storeId);
+        console.log(`Store ${storeId} ajouté au produit ${itemId}`);
+      } catch (productError) {
+        console.error(`Erreur lors de l'ajout du store ${storeId} au produit ${itemId}:`, productError);
+      }
+
+      return inventoryResult;
+    }
   }
 
   static async decrementInventoryItem(storeId, itemId, quantity) {

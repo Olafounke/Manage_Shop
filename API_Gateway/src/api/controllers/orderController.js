@@ -8,7 +8,14 @@ class OrderController {
   static async getUserOrders(req, res) {
     try {
       const result = await ProxyService.forwardRequest("orders", orders.endpoints.list, "GET", null, {}, req.user);
-      res.json(result);
+
+      const enrichedResults = [];
+      for (const orderGroup of result) {
+        const enrichedOrderGroup = await OrderService.enrichOrderWithStoreName(orderGroup);
+        enrichedResults.push(enrichedOrderGroup);
+      }
+
+      res.json(enrichedResults);
     } catch (error) {
       res.status(error.status || 500).json({ error: error.message });
     }
