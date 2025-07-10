@@ -66,7 +66,7 @@
       <div class="items-list">
         <div *ngFor="let item of cart?.items" class="cart-item">
           <div class="item-info">
-            <h3 class="item-id">Produit ID: {{ item.product }}</h3>
+            <h3 class="item-id">{{ item.productName }}</h3>
             <p class="item-price">{{ formatPrice(item.price) }}</p>
           </div>
 
@@ -163,7 +163,7 @@
       <h3>Récapitulatif de votre commande</h3>
       <div class="summary-items">
         <div *ngFor="let item of cart?.items" class="summary-item">
-          <span>{{ item.quantity }}x Produit ID: {{ item.product }}</span>
+          <span>{{ item.quantity }}x {{ item.productName }}</span>
           <span>{{ formatPrice(item.price * item.quantity) }}</span>
         </div>
       </div>

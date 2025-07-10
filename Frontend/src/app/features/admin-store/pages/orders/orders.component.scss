@@ -30,6 +30,18 @@
   }
 }
 
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+
+  app-button {
+    flex-shrink: 0;
+  }
+}
+
 .no-orders {
   text-align: center;
   padding: 3rem;
@@ -71,6 +83,16 @@
   .orders-section {
     h2 {
       font-size: 1.2rem;
+    }
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+
+    app-button {
+      width: 100%;
     }
   }
 }

@@ -45,6 +45,9 @@ export class InventoryService {
     itemId: string,
     request: UpdateInventoryItemRequest
   ): Observable<InventoryItem> {
+    console.log('updateInventoryItem', request);
+    console.log('storeId', storeId);
+    console.log('itemId', itemId);
     return this.http.put<InventoryItem>(
       `${this.apiUrl}/${storeId}/inventory/${itemId}`,
       request

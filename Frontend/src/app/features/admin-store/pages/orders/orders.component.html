@@ -7,17 +7,30 @@
   <h2>Commandes validées</h2>
   <app-table [columns]="commonColumns" [data]="validatedOrders">
     <ng-template #actionsTemplate let-item>
-      <app-button
-        [config]="{
-          style: 'save',
-          type: 'button',
-          size: 'small',
-          display: 'icon+text',
-          text: 'Préparer',
-          icon: 'check'
-        }"
-        (onClick)="prepareOrder(item._id)"
-      />
+      <div class="action-buttons">
+        <app-button
+          [config]="{
+            style: 'default',
+            type: 'button',
+            size: 'small',
+            display: 'icon+text',
+            text: 'Détails',
+            icon: 'visibility'
+          }"
+          (onClick)="viewOrderDetails(item)"
+        />
+        <app-button
+          [config]="{
+            style: 'save',
+            type: 'button',
+            size: 'small',
+            display: 'icon+text',
+            text: 'Préparer',
+            icon: 'check'
+          }"
+          (onClick)="prepareOrder(item._id)"
+        />
+      </div>
     </ng-template>
   </app-table>
 </div>
@@ -27,17 +40,30 @@
   <h2>Commandes préparées</h2>
   <app-table [columns]="commonColumns" [data]="preparedOrders">
     <ng-template #actionsTemplate let-item>
-      <app-button
-        [config]="{
-          style: 'save',
-          type: 'button',
-          size: 'small',
-          display: 'icon+text',
-          text: 'Expédier',
-          icon: 'local_shipping'
-        }"
-        (onClick)="shipOrder(item._id)"
-      />
+      <div class="action-buttons">
+        <app-button
+          [config]="{
+            style: 'default',
+            type: 'button',
+            size: 'small',
+            display: 'icon+text',
+            text: 'Détails',
+            icon: 'visibility'
+          }"
+          (onClick)="viewOrderDetails(item)"
+        />
+        <app-button
+          [config]="{
+            style: 'save',
+            type: 'button',
+            size: 'small',
+            display: 'icon+text',
+            text: 'Expédier',
+            icon: 'local_shipping'
+          }"
+          (onClick)="shipOrder(item._id)"
+        />
+      </div>
     </ng-template>
   </app-table>
 </div>
@@ -47,17 +73,19 @@
   <h2>Commandes expédiées</h2>
   <app-table [columns]="commonColumns" [data]="shippedOrders">
     <ng-template #actionsTemplate let-item>
-      <app-button
-        [config]="{
-          style: 'default',
-          type: 'button',
-          size: 'small',
-          display: 'icon+text',
-          text: 'Détails',
-          icon: 'visibility'
-        }"
-        (onClick)="viewOrderDetails(item._id)"
-      />
+      <div class="action-buttons">
+        <app-button
+          [config]="{
+            style: 'default',
+            type: 'button',
+            size: 'small',
+            display: 'icon+text',
+            text: 'Détails',
+            icon: 'visibility'
+          }"
+          (onClick)="viewOrderDetails(item)"
+        />
+      </div>
     </ng-template>
   </app-table>
 </div>
@@ -79,3 +107,10 @@
 <div class="error-message" *ngIf="error">
   <p>{{ error }}</p>
 </div>
+
+<!-- Modal de détails de commande -->
+<app-order-details-modal
+  [isOpen]="isDetailsModalOpen"
+  [order]="selectedOrder"
+  (closeModal)="closeDetailsModal()"
+></app-order-details-modal>

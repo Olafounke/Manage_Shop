@@ -1,0 +1,24 @@
+.construction-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+  padding-top: 4rem;
+
+  h2 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    font-family: "Kanit", sans-serif;
+  }
+
+  p {
+    color: #acacac;
+    font-size: 1.1rem;
+    margin: 0;
+    margin-bottom: 3rem;
+  }
+}

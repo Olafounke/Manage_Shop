@@ -1,5 +1,6 @@
 export interface CartItem {
   product: string;
+  productName: string;
   quantity: number;
   price: number;
 }
@@ -15,6 +16,7 @@ export interface Cart {
 
 export interface AddToCartRequest {
   productId: string;
+  productName: string;
   quantity: number;
   price: number;
 }

@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { OrderDetailsModalComponent } from '../../components/order-details-modal/order-details-modal.component';
 import { OrderService } from '../../../../core/services/order.service';
 import { UserService } from '../../../../core/services/user.service';
 import { Order } from '../../../../core/models/order.interface';
 import { TableColumn } from '../../../../core/models/table.interface';
 
 interface OrderDisplay extends Order {
+  orderIdText: string;
+  userNameText: string;
   statusText: string;
   createdAtText: string;
   subtotalText: string;
@@ -17,7 +20,13 @@ interface OrderDisplay extends Order {
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableComponent,
+    ButtonComponent,
+    OrderDetailsModalComponent,
+  ],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss',
 })
@@ -25,6 +34,8 @@ export class OrdersComponent implements OnInit {
   userStoreId: string = '';
   loading: boolean = false;
   error: string | null = null;
+  selectedOrder: Order | null = null;
+  isDetailsModalOpen: boolean = false;
 
   // Commandes organisées par statut
   validatedOrders: OrderDisplay[] = [];
@@ -33,8 +44,18 @@ export class OrdersComponent implements OnInit {
 
   // Configuration des colonnes communes
   commonColumns: TableColumn[] = [
-    { key: '_id', header: 'ID Commande', type: 'text', editable: false },
-    { key: 'user', header: 'Client', type: 'text', editable: false },
+    {
+      key: 'orderIdText',
+      header: 'ID Commande',
+      type: 'text',
+      editable: false,
+    },
+    {
+      key: 'userNameText',
+      header: 'Nom du client',
+      type: 'text',
+      editable: false,
+    },
     { key: 'subtotalText', header: 'Montant', type: 'text', editable: false },
     { key: 'createdAtText', header: 'Date', type: 'text', editable: false },
     {
@@ -100,10 +121,16 @@ export class OrdersComponent implements OnInit {
   convertOrderToDisplay(order: Order): OrderDisplay {
     return {
       ...order,
+      orderIdText: this.getOrderId(order),
+      userNameText: order.orderGroup.userName,
       statusText: this.getStatusText(order.status),
       createdAtText: new Date(order.createdAt).toLocaleDateString('fr-FR'),
       subtotalText: this.formatPrice(order.subtotal),
     };
+  }
+
+  getOrderId(order: Order): string {
+    return order.orderGroup._id.slice(-8);
   }
 
   getStatusText(status: string): string {
@@ -148,10 +175,15 @@ export class OrdersComponent implements OnInit {
     this.updateOrderStatus(orderId, 'SHIPPED');
   }
 
-  // Actions pour les commandes expédiées (terminées)
-  viewOrderDetails(orderId: string): void {
-    // Ici vous pourriez ouvrir une modal pour voir les détails
-    console.log('Voir les détails de la commande:', orderId);
+  // Actions pour voir les détails d'une commande
+  viewOrderDetails(order: Order): void {
+    this.selectedOrder = order;
+    this.isDetailsModalOpen = true;
+  }
+
+  closeDetailsModal(): void {
+    this.isDetailsModalOpen = false;
+    this.selectedOrder = null;
   }
 
   getOrderItemsText(order: Order): string {

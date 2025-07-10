@@ -131,6 +131,7 @@ export class ProductDetailComponent implements OnInit {
 
     const addToCartRequest: AddToCartRequest = {
       productId: this.product._id,
+      productName: this.product.name,
       quantity: this.quantity,
       price: this.product.price,
     };

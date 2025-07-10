@@ -4,23 +4,14 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-}
-
-export interface Order {
-  _id: string;
-  orderGroup: string;
-  user: string;
-  storeId: string;
-  items: OrderItem[];
-  subtotal: number;
-  status: 'PENDING' | 'VALIDATED' | 'PREPARED' | 'SHIPPED' | 'CANCELLED';
-  createdAt: Date;
-  updatedAt: Date;
+  _id?: string;
 }
 
 export interface OrderGroup {
   _id: string;
   user: string;
+  userName: string;
+  userEmail: string;
   userAddress: {
     fullAddress: string;
     longitude: number;
@@ -34,6 +25,19 @@ export interface OrderGroup {
     | 'COMPLETED'
     | 'CANCELLED';
   orders: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Order {
+  _id: string;
+  orderGroup: OrderGroup;
+  user: string;
+  storeId: string;
+  storeName?: string;
+  items: OrderItem[];
+  subtotal: number;
+  status: 'PENDING' | 'VALIDATED' | 'PREPARED' | 'SHIPPED' | 'CANCELLED';
   createdAt: Date;
   updatedAt: Date;
 }

@@ -46,7 +46,7 @@ export class StockComponent implements OnInit {
     {
       key: 'quantity',
       header: 'Quantité locale',
-      type: 'text',
+      type: 'number',
       editable: true,
     },
     {
@@ -98,14 +98,13 @@ export class StockComponent implements OnInit {
     this.stocks.forEach((stock) => {
       this.productService.getProductById(stock.productId).subscribe({
         next: (product: Product) => {
-          stock.totalQuantity = product.totalInventory || 0;
+          stock.totalQuantity = product.totalInventory;
         },
         error: (err) => {
           console.error(
             `Erreur lors de la récupération du produit ${stock.productId}:`,
             err
           );
-          stock.totalQuantity = 0;
         },
       });
     });
@@ -119,6 +118,9 @@ export class StockComponent implements OnInit {
       const updateData = {
         quantity: this.editingStock.quantity,
       };
+      console.log('updateData', updateData);
+      console.log('userStoreId', this.userStoreId);
+      console.log('editingStock.productId', this.editingStock.productId);
 
       this.inventoryService
         .updateInventoryItem(
@@ -128,6 +130,7 @@ export class StockComponent implements OnInit {
         )
         .subscribe({
           next: (updatedStock) => {
+            console.log('updatedStock', updatedStock);
             const index = this.stocks.findIndex(
               (s) => s.id === this.editingStock!.id
             );
@@ -138,6 +141,10 @@ export class StockComponent implements OnInit {
                 this.editingStock!.totalQuantity;
             }
             this.editingStock = null;
+            setTimeout(() => {
+              this.productService.getProducts();
+              this.loadTotalQuantities();
+            }, 1000);
           },
           error: (err) =>
             console.error('Erreur lors de la mise à jour du stock:', err),
@@ -151,12 +158,14 @@ export class StockComponent implements OnInit {
         ...this.editingStock,
         quantity: parseInt(event.value) || 0,
       };
+      console.log('editingStock', this.editingStock);
     }
   }
 
   toggleEditStock(stock?: StockDisplay): void {
     if (stock) {
       this.editingStock = { ...stock };
+      console.log('editingStock', this.editingStock);
     } else {
       this.editingStock = null;
     }

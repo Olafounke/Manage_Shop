@@ -84,6 +84,19 @@
             </div>
 
             <!-- Text -->
+            <ng-container *ngSwitchCase="'number'">
+              <input
+                *ngIf="isEditing(item) && column.editable !== false"
+                type="number"
+                [ngModel]="getValue(item, column.key)"
+                (ngModelChange)="onEditChange(item, column.key, $event)"
+                min="0"
+                class="edit-input"
+              />
+              <span *ngIf="!isEditing(item) || column.editable === false">{{
+                getValue(item, column.key)
+              }}</span>
+            </ng-container>
             <ng-container *ngSwitchDefault>
               <input
                 *ngIf="isEditing(item) && column.editable !== false"

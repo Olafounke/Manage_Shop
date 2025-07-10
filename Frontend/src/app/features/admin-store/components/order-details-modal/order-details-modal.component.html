@@ -1,0 +1,75 @@
+<app-modal
+  [isOpen]="isOpen"
+  title="Détails de la commande"
+  (closeModal)="close()"
+>
+  <div class="order-details" *ngIf="order">
+    <div class="order-info">
+      <div class="info-section">
+        <h4 class="section-title">Informations générales</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">ID Commande:</span>
+            <span class="value">{{ getOrderId() }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Statut:</span>
+            <span class="value status-{{ order.status.toLowerCase() }}">
+              {{ getStatusText(order.status) }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="label">Date de création:</span>
+            <span class="value">{{ formatDate(order.createdAt) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Montant total:</span>
+            <span class="value total-amount">{{
+              formatPrice(order.subtotal)
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h4 class="section-title">Informations client</h4>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Nom:</span>
+            <span class="value">{{ order.orderGroup.userName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ order.orderGroup.userEmail }}</span>
+          </div>
+          <div class="info-item full-width">
+            <span class="label">Adresse:</span>
+            <span class="value">{{
+              order.orderGroup.userAddress.fullAddress
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section last-section">
+        <h4 class="section-title">Produits commandés</h4>
+        <div class="products-list">
+          <div class="product-item" *ngFor="let item of order.items">
+            <div class="product-info">
+              <div class="product-name">{{ item.productName }}</div>
+              <div class="product-details">
+                <span class="quantity">{{ item.quantity }}x</span>
+                <span class="unit-price">{{
+                  formatPrice(item.unitPrice)
+                }}</span>
+                <span class="total-price">{{
+                  formatPrice(item.totalPrice)
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-modal>

@@ -84,12 +84,6 @@ export class TransfersComponent implements OnInit {
       type: 'text',
       editable: false,
     },
-    {
-      key: 'responseDateText',
-      header: 'Date de réponse',
-      type: 'text',
-      editable: false,
-    },
   ];
 
   // Colonnes pour les transferts entrants
@@ -112,7 +106,7 @@ export class TransfersComponent implements OnInit {
       key: 'actions',
       header: 'Actions',
       type: 'actions',
-      template: 'incomingActionsTemplate',
+      template: 'actionsTemplate',
     },
   ];
 
@@ -327,33 +321,47 @@ export class TransfersComponent implements OnInit {
         next: () => {
           this.loadTransferts();
           this.toggleCreateTransfertModal();
+          // Optionnel : ajouter un message de succès
+          console.log('Demande de transfert créée avec succès');
         },
-        error: (err) =>
-          console.error('Erreur lors de la création du transfert:', err),
+        error: (err) => {
+          console.error('Erreur lors de la création du transfert:', err);
+          // Optionnel : afficher un message d'erreur à l'utilisateur
+          alert(
+            'Erreur lors de la création de la demande de transfert. Veuillez réessayer.'
+          );
+        },
       });
     }
   }
 
   validateNewTransfert(): boolean {
-    return !!(
+    const isValid = !!(
       this.newTransfert.productId &&
       this.newTransfert.toStoreId &&
       this.newTransfert.quantity > 0
     );
+
+    // Validation supplémentaire : vérifier que la quantité ne dépasse pas le stock disponible
+    if (isValid && this.newTransfert.productId) {
+      const selectedStock = this.myStocks.find(
+        (stock) => stock.productId === this.newTransfert.productId
+      );
+      if (
+        selectedStock &&
+        this.newTransfert.quantity > selectedStock.quantity
+      ) {
+        alert(
+          `La quantité demandée (${this.newTransfert.quantity}) dépasse le stock disponible (${selectedStock.quantity})`
+        );
+        return false;
+      }
+    }
+
+    return isValid;
   }
 
-  // Actions sur les transferts entrants
-  prepareAction(action: 'accept' | 'reject', transfertId: string): void {
-    this.pendingAction = { action, transfertId };
-    const actionText = action === 'accept' ? 'accepter' : 'refuser';
-    this.confirmActionModal.toggleConfirmDelete(transfertId);
-  }
-
-  onConfirmAction(transfertId: string): void {
-    if (!this.pendingAction || this.pendingAction.transfertId !== transfertId)
-      return;
-
-    const action = this.pendingAction.action;
+  onConfirm(action: 'accept' | 'reject', transfertId: string): void {
     const serviceCall =
       action === 'accept'
         ? this.transfertService.acceptTransfert(transfertId)

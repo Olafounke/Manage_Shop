@@ -25,7 +25,7 @@
 <div class="transfers-section" *ngIf="incomingTransferts.length > 0">
   <h2>Demandes reçues</h2>
   <app-table [columns]="incomingColumns" [data]="incomingTransferts">
-    <ng-template #incomingActionsTemplate let-item>
+    <ng-template #actionsTemplate let-item>
       <app-button
         [config]="{
           style: 'save',
@@ -34,7 +34,7 @@
           display: 'icon',
           icon: 'check'
         }"
-        (onClick)="prepareAction('accept', item._id)"
+        (onClick)="onConfirm('accept', item._id)"
       />
       <app-button
         [config]="{
@@ -44,7 +44,7 @@
           display: 'icon',
           icon: 'close'
         }"
-        (onClick)="prepareAction('reject', item._id)"
+        (onClick)="onConfirm('reject', item._id)"
       />
     </ng-template>
   </app-table>
@@ -62,25 +62,26 @@
   [title]="'Faire une demande de transfert'"
   (closeModal)="toggleCreateTransfertModal()"
 >
-  <form (ngSubmit)="createTransfert()">
+  <form (ngSubmit)="createTransfert()" class="transfert-form">
     <div class="form-group">
-      <label for="productId">Produit à transférer</label>
+      <label for="productId">Produit à transférer *</label>
       <select
         id="productId"
         [(ngModel)]="newTransfert.productId"
         name="productId"
         (change)="onProductChange()"
         required
+        class="form-control"
       >
         <option value="">Sélectionner un produit</option>
         <option *ngFor="let stock of myStocks" [value]="stock.productId">
-          {{ stock.productName }} (Stock: {{ stock.quantity }})
+          {{ stock.productName }} (Stock disponible: {{ stock.quantity }})
         </option>
       </select>
     </div>
 
     <div class="form-group">
-      <label for="quantity">Quantité à transférer</label>
+      <label for="quantity">Quantité à transférer *</label>
       <input
         type="number"
         id="quantity"
@@ -88,17 +89,20 @@
         name="quantity"
         min="1"
         required
+        class="form-control"
+        placeholder="Entrez la quantité"
       />
     </div>
 
     <div class="form-group">
-      <label for="toStoreId">Magasin destinataire</label>
+      <label for="toStoreId">Magasin destinataire *</label>
       <select
         id="toStoreId"
         [(ngModel)]="newTransfert.toStoreId"
         name="toStoreId"
         (change)="onStoreChange()"
         required
+        class="form-control"
       >
         <option value="">Sélectionner un magasin</option>
         <option *ngFor="let store of availableStores" [value]="store.storeId">
@@ -114,7 +118,8 @@
           type: 'submit',
           size: 'medium',
           display: 'text',
-          text: 'Créer la demande'
+          text: 'Créer la demande',
+          disabled: !validateNewTransfert()
         }"
       />
       <app-button
@@ -130,18 +135,3 @@
     </div>
   </form>
 </app-modal>
-
-<!-- Modal de confirmation -->
-<app-generic-confirm-delete-modal
-  [title]="
-    pendingAction?.action === 'accept'
-      ? 'Confirmation d\'acceptation'
-      : 'Confirmation de refus'
-  "
-  [itemType]="
-    pendingAction?.action === 'accept'
-      ? 'accepter ce transfert'
-      : 'refuser ce transfert'
-  "
-  (confirmDelete)="onConfirmAction($event)"
-/>
