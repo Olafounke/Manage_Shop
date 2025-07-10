@@ -5,6 +5,7 @@ const router = Router();
 
 router.post("/", transfertController.createTransfert);
 router.get("/store/:storeId", transfertController.getTransfertsByStore);
+router.get("/:id", transfertController.getTransfertById);
 router.put("/:id/accept", transfertController.acceptTransfert);
 router.put("/:id/reject", transfertController.rejectTransfert);
 

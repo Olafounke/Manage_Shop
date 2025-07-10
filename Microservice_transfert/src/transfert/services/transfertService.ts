@@ -55,7 +55,7 @@ export class TransfertService {
 
       const query = type === "incoming" ? { toStoreId: storeId } : { fromStoreId: storeId };
 
-      const transferts = await Transfert.find(query).sort({ transfertDate: -1 });
+      const transferts = await Transfert.find({ ...query, status: "PENDING" }).sort({ transfertDate: -1 });
 
       return transferts;
     } catch (error: any) {
@@ -84,6 +84,7 @@ export class TransfertService {
       }
 
       transfert.status = "ACCEPTED";
+      transfert.responseDate = new Date();
 
       const updatedTransfert = await transfert.save();
       return updatedTransfert;
@@ -100,6 +101,7 @@ export class TransfertService {
       }
 
       transfert.status = "REJECTED";
+      transfert.responseDate = new Date();
 
       const updatedTransfert = await transfert.save();
       return updatedTransfert;

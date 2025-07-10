@@ -63,6 +63,17 @@ export class TransfertController {
     }
   }
 
+  public async getTransfertById(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const transfert = await TransfertService.getTransfertById(id);
+      res.json(transfert);
+    } catch (error: any) {
+      console.error("Erreur getTransfertById:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   public async acceptTransfert(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
