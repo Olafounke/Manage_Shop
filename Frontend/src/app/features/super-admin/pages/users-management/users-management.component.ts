@@ -101,7 +101,7 @@ export class UsersManagementComponent implements OnInit {
     this.storeService.getAllStores().subscribe({
       next: (stores) => {
         this.stores = stores;
-        this.availableStores = ['-', ...stores.map((store) => store.storeName)];
+        this.availableStores = ['-', ...stores.map((store) => store.name)];
       },
       error: (err) =>
         console.error('Erreur lors de la récupération des stores:', err),
@@ -110,7 +110,7 @@ export class UsersManagementComponent implements OnInit {
 
   getStoreId(storeName: string): string | undefined {
     if (storeName === '-') return undefined;
-    const store = this.stores.find((s) => s.storeName === storeName);
+    const store = this.stores.find((s) => s.name === storeName);
     return store?.storeId;
   }
 
@@ -126,7 +126,7 @@ export class UsersManagementComponent implements OnInit {
 
     const availableStores = this.stores
       .filter((store) => !usedStores.includes(store.storeId))
-      .map((store) => store.storeName);
+      .map((store) => store.name);
 
     return ['-', ...availableStores];
   }

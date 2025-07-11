@@ -3,7 +3,21 @@
   <section class="hero-section">
     <div class="hero-content">
       <h1 *ngIf="!userService.getUserFirstName()">Bienvenue sur Manage Shop</h1>
-      <h1 *ngIf="userService.getUserFirstName()">
+      <h1
+        *ngIf="
+          userService.getUserFirstName() &&
+          userService.getUserRole() === 'ADMIN_STORE'
+        "
+      >
+        Bienvenue {{ userService.getUserFirstName() }}
+        {{ userService.getUserLastName() }}
+      </h1>
+      <h1
+        *ngIf="
+          userService.getUserFirstName() &&
+          userService.getUserRole() !== 'ADMIN_STORE'
+        "
+      >
         Bienvenue {{ userService.getUserFirstName() }}
       </h1>
       <p>Découvrez notre sélection de produits</p>

@@ -120,9 +120,11 @@ export class StoresManagementComponent implements OnInit {
       next: (stores) => {
         this.stores = stores.map((store) => ({
           ...store,
+          storeName: store.name,
+          storeNameSlug: store.nameSlug,
           userEmail: this.getUserEmail(store.userId),
           createdAt: this.formatDate(store.createdAt),
-          storeAddress: store.storeAddress,
+          storeAddress: store.address,
           status: store.status || ('deployed' as StoreStatus),
         }));
       },
@@ -150,9 +152,11 @@ export class StoresManagementComponent implements OnInit {
   convertStoreToDisplay(store: Store): StoreDisplay {
     return {
       ...store,
+      storeName: store.name,
+      storeNameSlug: store.nameSlug,
       userEmail: this.getUserEmail(store.userId),
       createdAt: this.formatDate(store.createdAt),
-      storeAddress: store.storeAddress,
+      storeAddress: store.address,
       status: store.status || ('deployed' as StoreStatus),
     };
   }
@@ -235,14 +239,15 @@ export class StoresManagementComponent implements OnInit {
       const storeForModal: Store = {
         id: store?.id || 0,
         storeId: store?.storeId || '',
-        storeName: store?.storeName || '',
-        storeNameSlug: store?.storeNameSlug || '',
-        storeAddress: store?.storeAddress || '',
+        name: store?.storeName || '',
+        nameSlug: store?.storeNameSlug || '',
+        address: store?.storeAddress || '',
         longitude: store?.longitude,
         latitude: store?.latitude,
         userId: store?.userId,
         createdAt: new Date(store?.createdAt || ''),
         updatedAt: store?.updatedAt || new Date(),
+        port: 0,
       };
       this.editStoreModal.toggleEditStore(storeForModal);
     } else {

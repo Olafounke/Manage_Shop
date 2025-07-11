@@ -49,7 +49,7 @@ export class AddStoreModalComponent {
       this.storeService.createStore(this.newStore).subscribe({
         next: () => {
           this.refreshStores.emit();
-          this.toggleAddStore();
+          !this.showAddStoreModal;
         },
         error: (err) => {
           console.error("Erreur lors de l'ajout du magasin:", err);

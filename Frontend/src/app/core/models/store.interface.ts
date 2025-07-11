@@ -3,15 +3,16 @@ export type StoreStatus = 'deployed' | 'deleting' | 'pending';
 export interface Store {
   id: number;
   storeId: string;
-  storeName: string;
-  storeNameSlug: string;
-  storeAddress: string;
+  name: string;
+  nameSlug: string;
+  address: string;
   longitude?: string;
   latitude?: string;
   userId?: string;
   status?: StoreStatus;
   createdAt: Date;
   updatedAt: Date;
+  port: number;
 }
 
 export interface CreateStoreRequest {

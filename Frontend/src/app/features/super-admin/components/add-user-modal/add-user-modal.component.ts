@@ -15,6 +15,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class AddUserModalComponent {
   @Input() availableRoles: string[] = [];
+  @Input() availableStores: string[] = [];
   @Output() refreshUsers = new EventEmitter<User>();
 
   showAddUserModal = false;
@@ -62,5 +63,11 @@ export class AddUserModalComponent {
       this.newUser.role
       ? true
       : false;
+  }
+
+  onRoleChange(): void {
+    if (this.newUser.role === 'ADMIN_STORE') {
+      this.newUser.store = '';
+    }
   }
 }

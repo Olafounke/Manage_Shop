@@ -49,9 +49,28 @@
     </div>
     <div class="form-group">
       <label for="edit-role">Rôle</label>
-      <select id="edit-role" [(ngModel)]="editingModalUser.role" name="role">
+      <select
+        id="edit-role"
+        [(ngModel)]="editingModalUser.role"
+        name="role"
+        (change)="onRoleChange()"
+      >
         <option *ngFor="let role of availableRoles" [value]="role">
           {{ role }}
+        </option>
+      </select>
+    </div>
+    <div class="form-group" *ngIf="editingModalUser.role === 'ADMIN_STORE'">
+      <label for="store">Magasin</label>
+      <select
+        id="store"
+        [(ngModel)]="editingModalUser.store"
+        name="store"
+        required
+      >
+        <option value="">Sélectionner un magasin</option>
+        <option *ngFor="let store of availableStores" [value]="store">
+          {{ store }}
         </option>
       </select>
     </div>

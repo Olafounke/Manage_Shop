@@ -32,7 +32,6 @@ interface TransfertDisplay extends Transfert {
     TableComponent,
     ButtonComponent,
     ModalComponent,
-    GenericConfirmDeleteModalComponent,
   ],
   templateUrl: './transfers.component.html',
   styleUrl: './transfers.component.scss',
@@ -302,7 +301,7 @@ export class TransfersComponent implements OnInit {
       (store) => store.storeId === this.newTransfert.toStoreId
     );
     if (selectedStore) {
-      this.newTransfert.toStoreName = selectedStore.storeName;
+      this.newTransfert.toStoreName = selectedStore.name;
     }
   }
 
@@ -314,7 +313,7 @@ export class TransfersComponent implements OnInit {
       );
       if (userStore) {
         this.newTransfert.fromStoreId = this.userStoreId;
-        this.newTransfert.fromStoreName = userStore.storeName;
+        this.newTransfert.fromStoreName = userStore.name;
       }
 
       this.transfertService.createTransfert(this.newTransfert).subscribe({

@@ -14,6 +14,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 })
 export class EditUserModalComponent {
   @Input() availableRoles: string[] = [];
+  @Input() availableStores: string[] = [];
   @Output() updateUser = new EventEmitter<User>();
   @Output() toggleEditPassword = new EventEmitter<string>();
 
@@ -39,9 +40,8 @@ export class EditUserModalComponent {
 
   onRoleChange(): void {
     if (this.editingModalUser) {
-      // Si le rôle change et n'est plus ADMIN_STORE, on retire le store
       if (this.editingModalUser.role !== 'ADMIN_STORE') {
-        this.editingModalUser.store = undefined;
+        this.editingModalUser.store = '';
       }
     }
   }
