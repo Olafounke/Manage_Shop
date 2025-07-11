@@ -1,6 +1,5 @@
 const microservices = require("../../config/microservices");
 const Store = require("../models/storeModel");
-const authService = require("../../auth/services/authService");
 const ProxyService = require("./proxyService");
 const GeolocationService = require("./geolocationService");
 const productService = require("./productService");
@@ -17,7 +16,20 @@ class StoreService {
   static async getAllStores() {
     try {
       const stores = await Store.find({}).sort({ port: 1 });
-      return stores;
+      const storesData = [];
+
+      for (const store of stores) {
+        if (store.status === "deleting" || store.status === "failed" || store.status === "pending") {
+          continue;
+        }
+        const storeData = await this.getStoreById(store.storeId);
+        storesData.push({
+          ...storeData,
+          status: store.status,
+          port: store.port,
+        });
+      }
+      return storesData;
     } catch (error) {
       console.error("Erreur lors de la récupération des stores:", error);
       throw new Error("Impossible de récupérer les informations des stores");
@@ -111,7 +123,8 @@ class StoreService {
   static async updateStoreById(storeId, storeName, storeAddress, userId) {
     try {
       const body = {};
-      const { port, oldUserId } = await this.getStorePort(storeId);
+      const bodyForStoreConfig = {};
+      const { port, oldUserId, oldStoreName } = await this.getStorePort(storeId);
       const store = await this.getStoreById(storeId);
 
       if (storeName) {
@@ -124,18 +137,22 @@ class StoreService {
           usedStoreNameSlugs
         );
 
-        if (isStoreNameOrSlugTaken) {
+        if (isStoreNameOrSlugTaken && oldStoreName !== storeName) {
           throw new Error("Un store avec ce nom existe déjà");
         }
-        body.storeName = storeName;
+        body.name = storeName;
+        bodyForStoreConfig.storeName = storeName;
       }
 
       if (storeAddress) {
-        body.storeAddress = storeAddress;
+        body.address = storeAddress;
+        bodyForStoreConfig.storeAddress = storeAddress;
         try {
           const geocodeResult = await GeolocationService.geocodeAddress(storeAddress.trim());
           body.latitude = geocodeResult.latitude;
           body.longitude = geocodeResult.longitude;
+          bodyForStoreConfig.latitude = geocodeResult.latitude;
+          bodyForStoreConfig.longitude = geocodeResult.longitude;
           console.log(`Nouvelle adresse géocodée pour le store ${storeId}: ${body.latitude}, ${body.longitude}`);
         } catch (geocodeError) {
           console.warn(`Impossible de géocoder la nouvelle adresse "${storeAddress}":`, geocodeError.message);
@@ -144,6 +161,7 @@ class StoreService {
 
       if (userId && userId !== oldUserId) {
         body.userId = userId;
+        bodyForStoreConfig.userId = userId;
       }
 
       const result = await ProxyService.forwardRequest(
@@ -159,8 +177,11 @@ class StoreService {
       );
 
       if (result) {
-        await Store.findOneAndUpdate({ storeId }, body);
-
+        await Store.findOneAndUpdate({ storeId }, bodyForStoreConfig);
+        console.log("oldUserId", oldUserId);
+        console.log("userId", userId);
+        console.log("storeId", storeId);
+        const authService = require("../../auth/services/authService");
         if (userId && userId !== oldUserId) {
           try {
             if (oldUserId) {
@@ -208,6 +229,7 @@ class StoreService {
 
       if (store.userId) {
         try {
+          const authService = require("../../auth/services/authService");
           await authService.updateRoleOnly(store.userId, {
             role: "USER",
             store: null,
@@ -245,7 +267,7 @@ class StoreService {
       throw new Error(`Store ${storeId} n'est pas encore déployé (status: ${store.status})`);
     }
 
-    return { port: store.port, oldUserId: store.userId };
+    return { port: store.port, oldUserId: store.userId, oldStoreName: store.storeName };
   }
 
   static async getUsedStoreData() {
@@ -254,8 +276,8 @@ class StoreService {
       (acc, store) => {
         acc.usedPorts.push(store.port);
         acc.usedStoreIds.push(store.storeId);
-        acc.usedStoreNames.push(store.storeName);
-        acc.usedStoreNameSlugs.push(store.storeNameSlug);
+        acc.usedStoreNames.push(store.name);
+        acc.usedStoreNameSlugs.push(store.nameSlug);
         return acc;
       },
       { usedPorts: [], usedStoreIds: [], usedStoreNames: [], usedStoreNameSlugs: [] }
@@ -368,6 +390,7 @@ class StoreService {
 
   static async updateUserRoleAndAssignStore(userId, storeId, storeCreationResult) {
     try {
+      const authService = require("../../auth/services/authService");
       await authService.updateRoleOnly(userId, {
         role: "ADMIN_STORE",
         store: storeId,

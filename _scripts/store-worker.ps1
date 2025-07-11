@@ -262,10 +262,6 @@ while ($true) {
                     
                     if ($storeRemoved) {
                         & .\_scripts\generate-stores-compose.ps1 | Out-Null
-                        Push-Location _docker-compose
-                        docker-compose down --remove-orphans 2>$null | Out-Null
-                        docker-compose up -d 2>$null | Out-Null
-                        Pop-Location
                         
                         Write-Host "Store $($store.storeName) supprimé avec succès" -ForegroundColor Green
                     } else {

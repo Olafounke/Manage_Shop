@@ -20,7 +20,7 @@ class ProductInventoryService {
       })
     );
 
-    return enrichedProducts.filter((product) => product.inStock === true);
+    return enrichedProducts;
   }
 
   static async enrichProductsWithInventoryAndUpdatePagination(products, paginationData) {
@@ -32,11 +32,8 @@ class ProductInventoryService {
     const recalculatedTotalPages = Math.ceil(filteredTotal / limit);
 
     return {
+      ...paginationData,
       products: enrichedProducts,
-      total: filteredTotal,
-      page: currentPage,
-      limit: limit,
-      totalPages: recalculatedTotalPages,
     };
   }
 

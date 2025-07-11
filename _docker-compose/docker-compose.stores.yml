@@ -1,8 +1,8 @@
-﻿# Generated: 2025-07-10 22:45:40
+﻿# Generated: 2025-07-11 08:29:56
 services:
 
-  ms_store_magasin-2:
-    container_name: ms-store-magasin-2
+  ms_store_trade-zone:
+    container_name: ms-store-trade-zone
     build:
       context: ../Microservice_store
       dockerfile: Dockerfile
@@ -11,26 +11,54 @@ services:
       ms-postgres-db:
         condition: service_healthy
     environment:
-      - STORE_ID=2aadd47a
-      - STORE_NAME=Magasin 2
-      - STORE_NAME_SLUG=magasin-2
-      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
-      - STORE_LONGITUDE=3.8728999
-      - STORE_LATITUDE=43.5628201
+      - STORE_ID=20565cca
+      - STORE_NAME=Trade Zone
+      - STORE_NAME_SLUG=trade-zone
+      - STORE_ADDRESS=12 Avenue Flora, 06000 Nice
+      - STORE_LONGITUDE=7.270532
+      - STORE_LATITUDE=43.7117036
+      - USER_ID=68705483bdc70ebb0d0469d7
+      - PORT=8003
+      - POSTGRES_HOST=ms-postgres-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=db-store-trade-zone
+    ports:
+      - "8003:8003"
+    networks:
+      - manage-shop-network
+
+  ms_store_buy-maker:
+    container_name: ms-store-buy-maker
+    build:
+      context: ../Microservice_store
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      ms-postgres-db:
+        condition: service_healthy
+    environment:
+      - STORE_ID=3ecbbe00
+      - STORE_NAME=Buy Maker
+      - STORE_NAME_SLUG=buy-maker
+      - STORE_ADDRESS=2 Rue Frederic Bazille, 34000 Montpellier
+      - STORE_LONGITUDE=3.8805667
+      - STORE_LATITUDE=43.6027697
       - USER_ID=
       - PORT=8002
       - POSTGRES_HOST=ms-postgres-db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_NAME=db-store-magasin-2
+      - DB_NAME=db-store-buy-maker
     ports:
       - "8002:8002"
     networks:
       - manage-shop-network
 
-  ms_store_magasin-3:
-    container_name: ms-store-magasin-3
+  ms_store_shop-land:
+    container_name: ms-store-shop-land
     build:
       context: ../Microservice_store
       dockerfile: Dockerfile
@@ -39,75 +67,19 @@ services:
       ms-postgres-db:
         condition: service_healthy
     environment:
-      - STORE_ID=533e9db5
-      - STORE_NAME=Magasin 3
-      - STORE_NAME_SLUG=magasin-3
-      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
-      - STORE_LONGITUDE=3.8728999
-      - STORE_LATITUDE=43.5628201
-      - USER_ID=68528747130544406e053d65
-      - PORT=8003
-      - POSTGRES_HOST=ms-postgres-db
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_NAME=db-store-magasin-3
-    ports:
-      - "8003:8003"
-    networks:
-      - manage-shop-network
-
-  ms_store_gshsh:
-    container_name: ms-store-gshsh
-    build:
-      context: ../Microservice_store
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      ms-postgres-db:
-        condition: service_healthy
-    environment:
-      - STORE_ID=949107e7
-      - STORE_NAME=gshsh
-      - STORE_NAME_SLUG=gshsh
-      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
-      - STORE_LONGITUDE=3.8728999
-      - STORE_LATITUDE=43.5628201
-      - USER_ID=
-      - PORT=8004
-      - POSTGRES_HOST=ms-postgres-db
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_NAME=db-store-gshsh
-    ports:
-      - "8004:8004"
-    networks:
-      - manage-shop-network
-
-  ms_store_magasin-1:
-    container_name: ms-store-magasin-1
-    build:
-      context: ../Microservice_store
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      ms-postgres-db:
-        condition: service_healthy
-    environment:
-      - STORE_ID=9bbdf4e5
-      - STORE_NAME=Magasin 1
-      - STORE_NAME_SLUG=magasin-1
-      - STORE_ADDRESS=24 Plan du Terral, 34970 Lattes
-      - STORE_LONGITUDE=3.8728999
-      - STORE_LATITUDE=43.5628201
-      - USER_ID=
+      - STORE_ID=cdb8d48b
+      - STORE_NAME=Shop Land
+      - STORE_NAME_SLUG=shop-land
+      - STORE_ADDRESS=8 Rue Viete, 75017 Paris
+      - STORE_LONGITUDE=2.3068179
+      - STORE_LATITUDE=48.8841542
+      - USER_ID=68705439bdc70ebb0d0469c4
       - PORT=8001
       - POSTGRES_HOST=ms-postgres-db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_NAME=db-store-magasin-1
+      - DB_NAME=db-store-shop-land
     ports:
       - "8001:8001"
     networks:
