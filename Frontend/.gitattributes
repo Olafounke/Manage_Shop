@@ -1,0 +1,26 @@
+# Par défaut: tous les fichiers texte en LF à l'extraction
+* text=auto eol=lf
+
+# Explicites (utile si tu veux être strict)
+*.sh     text eol=lf
+*.env    text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+Dockerfile text eol=lf
+*.py     text eol=lf
+*.js     text eol=lf
+*.ts     text eol=lf
+*.json   text eol=lf
+*.sql    text eol=lf
+*.md     text eol=lf
+*.ps1    text eol=lf
+*.bat    text eol=lf
+*.sh     text eol=lf
+
+# Binaires (jamais touchés)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.zip -text
