@@ -7,6 +7,12 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - APP_ENV=${APP_ENV}
+      - APP_SECRET=${APP_SECRET}
+      - CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN}
+      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:

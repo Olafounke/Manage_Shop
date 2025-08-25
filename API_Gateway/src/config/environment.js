@@ -26,8 +26,8 @@ const safeParseInt = (value, defaultValue) => {
 module.exports = {
   PORT: process.env.PORT,
 
-  USERS_DB_URI: constructUserMongoDBUri(),
-  STORES_DB_URI: constructStoreMongoDBUri(),
+  USERS_DB_URI: process.env.MONGODB_URI_USERS || constructUserMongoDBUri(),
+  STORES_DB_URI: process.env.MONGODB_URI_STORE || constructStoreMongoDBUri(),
 
   TOKEN_SECRET: process.env.TOKEN_SECRET,
   TOKEN_EXPIRATION: safeParseInt(process.env.TOKEN_EXPIRATION, 86400000),

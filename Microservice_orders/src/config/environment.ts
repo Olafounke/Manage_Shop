@@ -30,7 +30,7 @@ interface Environment {
 
 export const environment: Environment = {
   PORT: safeParseInt(process.env.PORT, 3003),
-  DB_URI: constructMongoDBUri(),
+  DB_URI: process.env.MONGODB_URI || constructMongoDBUri(),
   CORS_ORIGIN: process.env.CORS_ORIGIN,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 };
